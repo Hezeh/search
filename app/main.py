@@ -10,7 +10,7 @@ if prod:
     user = os.environ.get("ELASTIC_USER")
     secret = os.environ.get("ELASTIC_SECRET")
     host = os.environ.get("ELASTIC_HOST")
-    es = AsyncElasticsearch([f'https://{user}:{secret}@{localhost}:443'])
+    es = AsyncElasticsearch([f'https://{user}:{secret}@{host}:443'])
 else:
     es = AsyncElasticsearch()
     
