@@ -24,9 +24,8 @@ class Search(BaseModel):
 
 
 # Whether the environ is dev or prod
-# prod = os.environ.get('ENV')
-prod = False
-if prod:
+prod = os.environ.get('ENV')
+if prod == 'prod':
     user = os.environ.get("ELASTIC_USER")
     secret = os.environ.get("ELASTIC_SECRET")
     host = os.environ.get("ELASTIC_HOST")
