@@ -10,6 +10,8 @@ fastapi = "*"
 uvicorn = "*"
 elasticsearch = {extras = ["async"], version = ">=7.8.0"}
 google-cloud-pubsub = "*"
+isort = "*"
+requests = "*"
 
 [requires]
 python_version = "3.8"
