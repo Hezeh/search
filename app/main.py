@@ -5,6 +5,7 @@ from elasticsearch import AsyncElasticsearch
 from typing import Optional
 import requests
 from pydantic import BaseModel
+import json
 
 app = FastAPI()
 
@@ -46,37 +47,113 @@ async def ping():
 
 @app.get('/suggestions')
 async def search_suggestions(q: str, country_code: str, language_code: str):
+    suggestions = []
     search = await es.search(
         index=f'items-{country_code}-{language_code}',
-        # index='products',
-        body={
-            "query": {
-                "multi_match": {
-                    "query": f'{q}',
-                    "fields": ["title", "description"]
+       body={
+            "_source": False,
+            "suggest": {
+                "text": f"{q}",
+                "title_suggestion": {
+                "completion": {
+                    "field": "suggest",
+                    "fuzzy": {
+                    "fuzziness": 2
+                    }
+                }
+                },
+                "title": {
+                "term": {
+                    "field": "title"
+                }
+                },
+                "title_search_as_you_type": {
+                "term": {
+                    "field": "title.search_as_you_type"
+                }
+                },
+                "title_2gram_search_as_you_type": {
+                "term": {
+                    "field": "title.search_as_you_type._2gram"
+                }
+                },
+                "title_3gram_search_as_you_type": {
+                "term": {
+                    "field": "title.search_as_you_type._3gram"
+                }
+                },
+                "title_term_suggest": {
+                "term": {
+                    "field": "title.term"
+                }
+                },
+                "title_trigram_suggest": {
+                "phrase": {
+                    "field": "title.trigram",
+                    "size" : 1,
+                    "direct_generator" : [ {
+                    "field" : "title.trigram",
+                    "suggest_mode" : "always"
+                    }, {
+                    "field" : "title.reverse",
+                    "suggest_mode" : "always",
+                    "pre_filter" : "reverse",
+                    "post_filter" : "reverse"
+                    } ]
+                }
+                },
+                "description": {
+                "term": {
+                    "field": "description"
+                }
+                },
+                "description_search_as_you_type": {
+                "term": {
+                    "field": "description.search_as_you_type"
+                }
+                },
+                "description_2gram_search_as_you_type": {
+                "term": {
+                    "field": "description.search_as_you_type._2gram"
+                }
+                },
+                "description_3gram_search_as_you_type": {
+                "term": {
+                    "field": "description.search_as_you_type._3gram"
+                }
+                },
+                "description_term_suggest": {
+                "term": {
+                    "field": "description.term"
+                }
+                },
+                "description_trigram_suggest": {
+                "phrase": {
+                    "field": "description.trigram",
+                    "size" : 1,
+                    "direct_generator" : [ {
+                    "field" : "title.trigram",
+                    "suggest_mode" : "always"
+                    }, {
+                    "field" : "title.reverse",
+                    "suggest_mode" : "always",
+                    "pre_filter" : "reverse",
+                    "post_filter" : "reverse"
+                    } ]
+                }
                 }
             }
-        },
-        size=5
+}
     )
-    return search
-
-# @app.get('/suggestions')
-# async def search_suggestions(body: Suggestions):
-#     search = await es.search(
-#         # index=f'items-{country_code}-{language_code}',
-#         index='products',
-#         body={
-#             "query": {
-#                 "multi_match": {
-#                     "query": f'{body.q}',
-#                     "fields": ["title", "description"]
-#                 }
-#             }
-#         },
-#         size=5
-#     )
-#     return search
+    json_suggestions = json.dumps(search)
+    description_suggestions = json_suggestions['suggest']['description']['options']
+    if json_suggestions['suggest']['description']['options'] != None:
+        for i in len(description_suggestions):
+            term_list = description_suggestions[i]
+            text = term_list['text']
+            suggestions.append(text)
+    print(suggestions)
+    return suggestions
 
 @app.get('/search')
 async def search_detail(
