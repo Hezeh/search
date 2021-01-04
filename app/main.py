@@ -145,19 +145,16 @@ async def search_suggestions(q: str, country_code: str, language_code: str):
             }
         }
     )
+    print(f"Search: {search}")
     json_suggestions = json.dumps(search)
-    description_suggestions = json_suggestions['suggest']['description']
+    print(f"json_suggestions {json_suggestions}")
+    description_suggestions = search['suggest']['description']
     for desc_suggestion in len(description_suggestions):
         options = desc_suggestion['options']
         if options != None:
             for option in options:
                 text = option['text']
                 suggestions.append(text)
-    # if json_suggestions['suggest']['description']['options'] != None:
-    #     for i in len(description_suggestions):
-    #         term_list = description_suggestions[i]
-    #         text = term_list['text']
-    #         suggestions.append(text)
     print(suggestions)
     return suggestions
 
