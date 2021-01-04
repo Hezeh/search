@@ -145,11 +145,11 @@ async def search_suggestions(q: str, country_code: str, language_code: str):
             }
         }
     )
-    print(f"Search: {search}")
-    json_suggestions = json.dumps(search)
-    print(f"json_suggestions {json_suggestions}")
-    description_suggestions = search['suggest']['description']
-    for desc_suggestion in len(description_suggestions):
+    json_suggestions_dump = json.dumps(search)
+    json_suggestions = json.loads(json_suggestions_dump)
+    # print(f"json_suggestions {json_suggestions}")
+    description_suggestions = json_suggestions["suggest"]["description"]
+    for desc_suggestion in description_suggestions:
         options = desc_suggestion['options']
         if options != None:
             for option in options:
