@@ -147,15 +147,56 @@ async def search_suggestions(q: str, country_code: str, language_code: str):
     )
     json_suggestions_dump = json.dumps(search)
     json_suggestions = json.loads(json_suggestions_dump)
-    # print(f"json_suggestions {json_suggestions}")
+    all_suggestions = []
     description_suggestions = json_suggestions["suggest"]["description"]
-    for desc_suggestion in description_suggestions:
-        options = desc_suggestion['options']
-        if options != None:
-            for option in options:
-                text = option['text']
-                suggestions.append(text)
-    print(suggestions)
+    description_twogram = json_suggestions["suggest"]["description_2gram_search_as_you_type"]
+    description_threegram = json_suggestions["suggest"]["description_3gram_search_as_you_type"]
+    description_search_as_you_type = json_suggestions["suggest"]["description_search_as_you_type"]
+    description_term = json_suggestions["suggest"]["description_term_suggest"]
+    description_trigram = json_suggestions["suggest"]["description_trigram_suggest"]
+    title = json_suggestions["suggest"]["title"]
+    title_threegram = json_suggestions["suggest"]["title_3gram_search_as_you_type"]
+    title_twogram = json_suggestions["suggest"]["title_2gram_search_as_you_type"]
+    title_search_as_you_type = json_suggestions["suggest"]["title_search_as_you_type"]
+    title_suggestion = json_suggestions["suggest"]["title_suggestion"]
+    title_term = json_suggestions["suggest"]["title_term_suggest"]
+    title_trigram = json_suggestions["suggest"]["title_trigram_suggest"]
+
+    if description_suggestions != None:
+        all_suggestions.append(description_suggestions)
+    if description_twogram != None:
+        all_suggestions.append(description_twogram)
+    if description_threegram != None:
+        all_suggestions.append(description_threegram)
+    if description_search_as_you_type != None:
+        all_suggestions.append(description_search_as_you_type)
+    if description_term != None:
+        all_suggestions.append(description_term)
+    if description_trigram != None:
+        all_suggestions.append(description_trigram)
+    if title != None:
+        all_suggestions.append(title)
+    if title_threegram != None:
+        all_suggestions.append(title_threegram)
+    if title_twogram != None:
+        all_suggestions.append(title_twogram)
+    if title_search_as_you_type != None:
+        all_suggestions.append(title_search_as_you_type)
+    if title_suggestion != None:
+        all_suggestions.append(title_suggestion)
+    if title_term != None:
+        all_suggestions.append(title_term)
+    if title_trigram != None:
+        all_suggestions.append(title_trigram)
+
+    for suggestion in all_suggestions:
+        for i in suggestion:
+            options = i["options"]
+            if options != None:
+                for option in options:
+                    text = option['text']
+                    suggestions.append(text)
+    suggestions = list(dict.fromkeys(suggestions))
     return {
         'suggestions': suggestions
     }
