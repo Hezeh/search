@@ -49,7 +49,7 @@ async def ping():
 async def search_suggestions(q: str, country_code: str, language_code: str):
     suggestions = []
     search = await es.search(
-        index=f'items-{country_code}-{language_code}',
+       index=f'items-{country_code}-{language_code}',
        body={
             "_source": False,
             "suggest": {
@@ -143,15 +143,21 @@ async def search_suggestions(q: str, country_code: str, language_code: str):
                 }
                 }
             }
-}
+        }
     )
     json_suggestions = json.dumps(search)
-    description_suggestions = json_suggestions['suggest']['description']['options']
-    if json_suggestions['suggest']['description']['options'] != None:
-        for i in len(description_suggestions):
-            term_list = description_suggestions[i]
-            text = term_list['text']
-            suggestions.append(text)
+    description_suggestions = json_suggestions['suggest']['description']
+    for desc_suggestion in len(description_suggestions):
+        options = desc_suggestion['options']
+        if options != None:
+            for option in options:
+                text = option['text']
+                suggestions.append(text)
+    # if json_suggestions['suggest']['description']['options'] != None:
+    #     for i in len(description_suggestions):
+    #         term_list = description_suggestions[i]
+    #         text = term_list['text']
+    #         suggestions.append(text)
     print(suggestions)
     return suggestions
 
