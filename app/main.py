@@ -156,7 +156,9 @@ async def search_suggestions(q: str, country_code: str, language_code: str):
                 text = option['text']
                 suggestions.append(text)
     print(suggestions)
-    return suggestions
+    return {
+        'suggestions': suggestions
+    }
 
 @app.get('/search')
 async def search_detail(
