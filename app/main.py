@@ -25,15 +25,19 @@ class Search(BaseModel):
 
 
 # Whether the environ is dev or prod
-prod = os.environ.get('ENV')
-if prod == 'prod':
-    user = os.environ.get("ELASTIC_USER")
-    secret = os.environ.get("ELASTIC_SECRET")
-    host = os.environ.get("ELASTIC_HOST")
-    es = AsyncElasticsearch([f'https://{user}:{secret}@{host}'])
-else:
-    es = AsyncElasticsearch()
+# prod = os.environ.get('ENV')
+# if prod == 'prod':
+#     user = os.environ.get("ELASTIC_USER")
+#     secret = os.environ.get("ELASTIC_SECRET")
+#     host = os.environ.get("ELASTIC_HOST")
+#     es = AsyncElasticsearch([f'https://{user}:{secret}@{host}'])
+# else:
+#     es = AsyncElasticsearch()
 
+host = 'localhost'
+secret = 'edH1m755qgVkh505jf3h1to6'
+user = 'elastic'
+es = AsyncElasticsearch([f'https://{user}:{secret}@{host}'])
 
 @app.get('/')
 async def home_page():
@@ -201,6 +205,22 @@ async def search_suggestions(q: str, country_code: str, language_code: str):
         'suggestions': suggestions
     }
 
+app.get('/gram')
+async def ngram(q: str):
+    suggestions = []
+    search_results = es.search(
+        index='items-ken-en',
+        body={
+            "query": {
+                "match_phrase_prefix": {
+                    "title": f"{q}"
+                }
+            }
+        }
+    )
+    # Extract the suggestions
+    return suggestions
+
 @app.get('/search')
 async def search_detail(
                         search_query: Search,
@@ -357,3 +377,23 @@ async def app_shutdown():
 #         }
 #     }
 # }
+
+# "analysis": {
+#  "filter": {
+#  "autocomplete_filter": {
+#  "type": "edge_ngram",
+#  "min_gram": 1,
+#  "max_gram": 20
+#  }
+#  },
+#  "analyzer": {
+#  "autocomplete": {
+#  "type": "custom",
+#  "tokenizer": "standard",
+#  "filter": [
+#  "lowercase",
+#  "autocomplete_filter"
+#  ]
+#  }
+#  }
+#  }
