@@ -1,7 +1,7 @@
 import os
 
 from fastapi import FastAPI, Header
-from elasticsearch import AsyncElasticsearch
+from elasticsearch import AsyncElasticsearch, Elasticsearch, Urllib3HttpConnection
 from typing import Optional
 import requests
 from pydantic import BaseModel
@@ -35,9 +35,16 @@ class Search(BaseModel):
 #     es = AsyncElasticsearch()
 
 host = 'localhost'
-secret = 'edH1m755qgVkh505jf3h1to6'
+secret = 'Ia488H64JEcYvxki1dO0M135'
 user = 'elastic'
-es = AsyncElasticsearch([f'https://{user}:{secret}@{host}'])
+es = AsyncElasticsearch(
+    [f'https://{user}:{secret}@{host}:443'],
+    transport_class=Urllib3HttpConnection,
+    sniff_on_start=True,
+    sniff_on_connection_fail=True,
+    sniffer_timeout=60,
+    maxsize=256,
+    )
 
 @app.get('/')
 async def home_page():
