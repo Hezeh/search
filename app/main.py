@@ -43,6 +43,9 @@ es = AsyncElasticsearch(
     sniff_on_connection_fail=True,
     sniffer_timeout=60,
     maxsize=256,
+    use_ssl=True,
+    verify_certs=False,
+    ssl_show_warn=False
     )
 
 @app.get('/')
