@@ -39,7 +39,6 @@ secret = 'Ia488H64JEcYvxki1dO0M135'
 user = 'elastic'
 es = AsyncElasticsearch(
     [f'https://{user}:{secret}@{host}:443'],
-    transport_class=Urllib3HttpConnection,
     sniff_on_start=True,
     sniff_on_connection_fail=True,
     sniffer_timeout=60,
