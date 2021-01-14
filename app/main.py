@@ -51,7 +51,11 @@ async def home_page():
 @app.get('/ping')
 async def ping():
     resp = await es.ping()
-    return resp
+    return {
+        'response': resp,
+        'host': host,
+        'user': user,
+    }
 
 @app.get('/suggestions')
 async def search_suggestions(q: str, country_code: str, language_code: str):
