@@ -29,9 +29,11 @@ prod = os.environ.get('ENV')
 if prod == 'prod':
     user = os.environ.get("ELASTIC_USER")
     secret = os.environ.get("ELASTIC_SECRET")
-    host = os.environ.get("ELASTIC_HOST")
+    # host = os.environ.get("ELASTIC_HOST")
+    host = os.environ.get('BEAMMART_SEARCH_ES_HTTP_SERVICE_HOST')
+    port = os.environ.get('BEAMMART_SEARCH_ES_HTTP_SERVICE_PORT')
 
-    es = AsyncElasticsearch([f'https://{user}:{secret}@{host}'],  
+    es = AsyncElasticsearch([f'https://{user}:{secret}@{host}:{port}'],  
     sniff_on_start=True,
     sniff_on_connection_fail=True,
     sniffer_timeout=60,
