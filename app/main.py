@@ -1,7 +1,7 @@
 import os
 
 from fastapi import FastAPI, Header
-from elasticsearch import AsyncElasticsearch, Elasticsearch, Urllib3HttpConnection
+from elasticsearch import AsyncElasticsearch, Urllib3HttpConnection
 from typing import Optional
 import requests
 from pydantic import BaseModel
@@ -25,20 +25,13 @@ class Search(BaseModel):
 
 
 # Whether the environ is dev or prod
-# prod = os.environ.get('ENV')
-# if prod == 'prod':
-#     user = os.environ.get("ELASTIC_USER")
-#     secret = os.environ.get("ELASTIC_SECRET")
-#     host = os.environ.get("ELASTIC_HOST")
-#     es = AsyncElasticsearch([f'https://{user}:{secret}@{host}'])
-# else:
-#     es = AsyncElasticsearch()
+prod = os.environ.get('ENV')
+if prod == 'prod':
+    user = os.environ.get("ELASTIC_USER")
+    secret = os.environ.get("ELASTIC_SECRET")
+    host = os.environ.get("ELASTIC_HOST")
 
-host = 'localhost'
-secret = 'Ia488H64JEcYvxki1dO0M135'
-user = 'elastic'
-es = AsyncElasticsearch(
-    [f'https://{user}:{secret}@{host}:443'],
+    es = AsyncElasticsearch([f'https://{user}:{secret}@{host}'],  
     sniff_on_start=True,
     sniff_on_connection_fail=True,
     sniffer_timeout=60,
@@ -47,6 +40,8 @@ es = AsyncElasticsearch(
     verify_certs=False,
     ssl_show_warn=False
     )
+else:
+    es = AsyncElasticsearch()
 
 @app.get('/')
 async def home_page():
