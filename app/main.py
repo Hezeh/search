@@ -55,6 +55,7 @@ async def ping():
         'response': resp,
         'host': host,
         'user': user,
+        'secret': secret,
     }
 
 @app.get('/suggestions')
