@@ -2,7 +2,7 @@ import os
 
 from fastapi import FastAPI, Header
 from elasticsearch import AsyncElasticsearch, Urllib3HttpConnection
-from typing import Optional
+from typing import List, Optional
 import requests
 from pydantic import BaseModel
 import json
@@ -23,27 +23,53 @@ class Search(BaseModel):
     country_code: str
     language_code: str
 
+class Location(BaseModel):
+    lat: int 
+    lon: int
+
+# class SearchResult(BaseModel):
+#     itemId: str
+#     images: List[str]
+#     title: str
+#     description: str
+#     price: int 
+#     category: str  
+#     subCategory: str 
+#     location: Location
+#     locationDescription: str 
+#     businessName: str
+#     businessDescription: str
+#     inStock: bool
+
 
 # Whether the environ is dev or prod
-prod = os.environ.get('ENV')
-if prod == 'prod':
-    user = os.environ.get("ELASTIC_USER")
-    secret = os.environ.get("ELASTIC_SECRET")
-    # host = os.environ.get("ELASTIC_HOST")
-    host = os.environ.get('BEAMMART_SEARCH_ES_HTTP_SERVICE_HOST')
-    port = os.environ.get('BEAMMART_SEARCH_ES_HTTP_SERVICE_PORT')
+# prod = os.environ.get('ENV')
+# if prod == 'prod':
+#     user = os.environ.get("ELASTIC_USER")
+#     secret = os.environ.get("ELASTIC_SECRET")
+#     host = os.environ.get('BEAMMART_SEARCH_ES_HTTP_SERVICE_HOST')
+#     port = os.environ.get('BEAMMART_SEARCH_ES_HTTP_SERVICE_PORT')
 
-    es = AsyncElasticsearch([f'https://{user}:{secret}@{host}:{port}'],  
-    sniff_on_start=True,
-    sniff_on_connection_fail=True,
-    sniffer_timeout=60,
-    maxsize=256,
-    use_ssl=True,
-    verify_certs=False,
-    ssl_show_warn=False
-    )
-else:
-    es = AsyncElasticsearch()
+#     es = AsyncElasticsearch([f'https://{user}:{secret}@{host}:{port}'],  
+#     sniff_on_start=True,
+#     sniff_on_connection_fail=True,
+#     sniffer_timeout=60,
+#     maxsize=256,
+#     use_ssl=True,
+#     verify_certs=False,
+#     ssl_show_warn=False
+#     )
+# else:
+#     es = AsyncElasticsearch()
+
+# user = 'elastic'
+# secret = '3HT54sh79oW1OS050aqMGtA9'
+# host = 'localhost'
+# port = '9200'
+
+# es = AsyncElasticsearch([f'http://{user}:{secret}@{host}:{port}'])
+
+es = AsyncElasticsearch()
 
 @app.get('/')
 async def home_page():
@@ -234,26 +260,34 @@ async def ngram(q: str):
 
 @app.get('/search')
 async def search_detail(
-                        search_query: Search,
+                        q: str, 
+                        country_code: str, 
+                        language_code: str,
+                        lat: float,
+                        lon: float,
                         user_agent: Optional[str] = Header(None), 
                         x_forwarded_for: Optional[str] = Header(None),
                        ):
     # If the user has allowed ip access: fetch the data else: use ip geolocation
-    if search_query.lat and search_query.lon:
-        response = await es.search(
-        index = f"items-{search_query.country_code}-{search_query.language_code}",
+    parsed_results = []
+    if lat and lon:
+        results = await es.search(
+        index = f"items-{country_code}-{language_code}",
         body = {
             "query": {
             "multi_match": {
-                "query": search_query.q,
+                "query": q,
                 "type": "best_fields",
-                "fields": ["title", "description"],
+                "fields": ["title", "description"]
                 }
             }
             },
         size=20,
         )
-        return response
+        for result in results['hits']['hits']:
+            source = result['_source']
+            parsed_results.append(source)
+        return parsed_results
     else:
         # TODO: fetch the key fron env variables in production
         # key = os.environ.get('IP_GEOLOCATION_KEY')
@@ -262,12 +296,12 @@ async def search_detail(
         ip_response = r.json()
         latitude = ip_response['latitude']
         longitude = ip_response['longitude']
-        search = await es.search(
-            index = f"items-{search_query.country_code}-{search_query.language_code}",
+        results = await es.search(
+            index = f"items-{country_code}-{language_code}",
             body = {
                 "query": {
                     "multi_match": {
-                        "query": search_query.query,
+                        "query": q,
                         "type": "best_fields",
                         "fields": ["title", "description"],
                     }
@@ -275,7 +309,10 @@ async def search_detail(
             },
             size=20,
         )
-        return search
+        for result in results['hits']['hits']:
+            source = result['_source']
+            parsed_results.append(source)
+        return parsed_results
 
 @app.on_event("shutdown")
 async def app_shutdown():

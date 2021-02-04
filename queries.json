@@ -1,0 +1,102 @@
+// This query has two top-level sections, filters and queries. The filter limits the result set
+// to include restaurants only near the user’s current location and (if specified) match
+// the user’s price and rating requirements. 
+
+{
+    "filter": {
+        "bool": {
+            "filter": [
+                {
+                    "geo_bounding_box": {
+                        "location": "<user's bounding box>"
+                    }
+                },
+                {
+                    "match": {
+                        "price": "<user's price preference>"
+                    }
+                },
+                {
+                    "match": {
+                        "rating": "<user's rating preference>"
+                    }
+                }
+            ]
+        }
+    },
+    "query": {
+        "function_score": {
+            "score_mode": "sum",
+            "query": {
+                "multi_match": {
+                    "query": "<user's search terms>",
+                    "fields": [
+                        "name^10",
+                        "cuisine_hifi^10",
+                        "cuisine_lofi^4",
+                        "menu^2",
+                        "description^1"
+                    ],
+                    "tie_breaker": 0.3
+                },
+                "functions": [
+                    {
+                        "weight": 1.2,
+                        "filter": {
+                            "bool": {
+                                "should": [
+                                    {
+                                        "term": {
+                                            "has_discount": true
+                                        },
+                                        "term": {
+                                            "promoted": true
+                                        },
+                                        "term": {
+                                            "engaged": true
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        "script_score": {
+                            "script": "0.3*doc['has_discount'].value + 0.5*doc['promoted'].value + 0.2*doc['engaged'].value"
+                        }
+                    },
+                    {
+                        "weight": 2.1,
+                        "gauss": {
+                            "location": {
+                                "origin": "<user's location>",
+                                "offset": "0km",
+                                "scale": "4km"
+                            }
+                        }
+                    },
+                    {
+                        "weight": 1.0
+                    }
+                ]
+            }
+        }
+    }
+}
+
+
+// Sort events by distance
+{
+    "query": {
+        "match": {
+            "title": "elasticsearch"
+        }
+    },
+    "sort": [
+        {
+            "_geo_distance": {
+                "location.geolocation": "40, -105",
+                "order": "asc",
+                "unit": "km"  // Each hit will have a sort value representing the distance from your location in kilometres
+            }
+        }
+    ]
+}

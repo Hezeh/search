@@ -12,6 +12,7 @@ elasticsearch = {extras = ["async"], version = ">=7.8.0"}
 google-cloud-pubsub = "*"
 isort = "*"
 requests = "*"
+gunicorn = "*"
 
 [requires]
 python_version = "3.8"
