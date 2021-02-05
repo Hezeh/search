@@ -287,7 +287,9 @@ async def search_detail(
         for result in results['hits']['hits']:
             source = result['_source']
             parsed_results.append(source)
-        return parsed_results
+        return {
+            'items': parsed_results
+        }
     else:
         # TODO: fetch the key fron env variables in production
         # key = os.environ.get('IP_GEOLOCATION_KEY')
@@ -312,7 +314,9 @@ async def search_detail(
         for result in results['hits']['hits']:
             source = result['_source']
             parsed_results.append(source)
-        return parsed_results
+        return {
+            'items': parsed_results
+        }
 
 @app.on_event("shutdown")
 async def app_shutdown():
