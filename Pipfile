@@ -7,7 +7,7 @@ verify_ssl = true
 
 [packages]
 fastapi = "*"
-uvicorn = "*"
+uvicorn = {extras = ["standard"], version = "*"}
 elasticsearch = {extras = ["async"], version = ">=7.8.0"}
 google-cloud-pubsub = "*"
 isort = "*"
