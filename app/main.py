@@ -1,14 +1,15 @@
 import os
 
 from fastapi import FastAPI, Header
-from elasticsearch import AsyncElasticsearch, Urllib3HttpConnection
+from elasticsearch import AsyncElasticsearch
 from typing import List, Optional
 import requests
 from pydantic import BaseModel
 import json
+from datetime import datetime
+from geojson import Point
 
 app = FastAPI()
-
 
 class Suggestions(BaseModel):
     q: str
@@ -27,47 +28,34 @@ class Location(BaseModel):
     lat: int 
     lon: int
 
-# class SearchResult(BaseModel):
-#     itemId: str
-#     images: List[str]
-#     title: str
-#     description: str
-#     price: int 
-#     category: str  
-#     subCategory: str 
-#     location: Location
-#     locationDescription: str 
-#     businessName: str
-#     businessDescription: str
-#     inStock: bool
-
-
-# Whether the environ is dev or prod
-# prod = os.environ.get('ENV')
-# if prod == 'prod':
-#     user = os.environ.get("ELASTIC_USER")
-#     secret = os.environ.get("ELASTIC_SECRET")
-#     host = os.environ.get('BEAMMART_SEARCH_ES_HTTP_SERVICE_HOST')
-#     port = os.environ.get('BEAMMART_SEARCH_ES_HTTP_SERVICE_PORT')
-
-#     es = AsyncElasticsearch([f'https://{user}:{secret}@{host}:{port}'],  
-#     sniff_on_start=True,
-#     sniff_on_connection_fail=True,
-#     sniffer_timeout=60,
-#     maxsize=256,
-#     use_ssl=True,
-#     verify_certs=False,
-#     ssl_show_warn=False
-#     )
-# else:
-#     es = AsyncElasticsearch()
-
-# user = 'elastic'
-# secret = '3HT54sh79oW1OS050aqMGtA9'
-# host = 'localhost'
-# port = '9200'
-
-# es = AsyncElasticsearch([f'http://{user}:{secret}@{host}:{port}'])
+class Item(BaseModel):
+    itemId: str
+    images: Optional[List[str]]
+    title: Optional[str]
+    description: Optional[str]
+    price: Optional[int] 
+    category: Optional[str]  
+    subCategory: Optional[str] 
+    location: Optional[Point]
+    locationDescription: Optional[str] 
+    businessName: Optional[str]
+    businessDescription: Optional[str]
+    phoneNumber: Optional[int]
+    inStock: Optional[bool]
+    mondayOpeningHours: Optional[datetime]
+    mondayClosingHours:  Optional[datetime]
+    tuesdayOpeningHours:  Optional[datetime]  
+    tuesdayClosingHours:  Optional[datetime]
+    wednesdayOpeningHours:  Optional[datetime] 
+    wednesdayClosingHours:  Optional[datetime]
+    thursdayOpeningHours:  Optional[datetime]
+    thursdayClosingHours:  Optional[datetime] 
+    fridayOpeningHours:  Optional[datetime]   
+    fridayClosingHours:  Optional[datetime]     
+    saturdayOpeningHours:  Optional[datetime]
+    saturdayClosingHours:  Optional[datetime]
+    sundayOpeningHours:  Optional[datetime] 
+    sundayClosingHours:  Optional[datetime]
 
 es = AsyncElasticsearch()
 
@@ -79,12 +67,7 @@ async def home_page():
 @app.get('/ping')
 async def ping():
     resp = await es.ping()
-    return {
-        'response': resp,
-        'host': host,
-        'user': user,
-        'secret': secret,
-    }
+    return resp
 
 @app.get('/suggestions')
 async def search_suggestions(q: str, country_code: str, language_code: str):
@@ -242,21 +225,21 @@ async def search_suggestions(q: str, country_code: str, language_code: str):
         'suggestions': suggestions
     }
 
-app.get('/gram')
-async def ngram(q: str):
-    suggestions = []
-    search_results = es.search(
-        index='items-ken-en',
-        body={
-            "query": {
-                "match_phrase_prefix": {
-                    "title": f"{q}"
-                }
-            }
-        }
-    )
-    # Extract the suggestions
-    return suggestions
+# @app.get('/gram')
+# async def ngram(q: str):
+#     suggestions = []
+#     search_results = es.search(
+#         index='items-ken-en',
+#         body={
+#             "query": {
+#                 "match_phrase_prefix": {
+#                     "title": f"{q}"
+#                 }
+#             }
+#         }
+#     )
+#     # Extract the suggestions
+#     return suggestions
 
 @app.get('/search')
 async def search_detail(
@@ -317,6 +300,85 @@ async def search_detail(
         return {
             'items': parsed_results
         }
+
+@app.post('/index')
+async def index_es(item: Item):
+    body = {}
+    if item.images != None:
+        body['images'] = item.images
+    if item.title != None:
+        body['title'] = item.title
+    if item.description != None:
+        body['description'] = item.description
+    if item.price != None:
+        body['price'] = item.price
+    if item.category != None:
+        body['categogry'] = item.category
+    if item.subCategory != None:
+        body['subCategory'] = item.subCategory
+    if item.location != None:
+        body['location'] = item.location
+    if item.locationDescription != None:
+        body['locationDescription'] = item.locationDescription
+    if item.businessName != None: 
+        body['businessName'] = item.businessName
+    if item.businessDescription != None:
+        body['businessDescription'] = item.businessDescription
+    if item.phoneNumber != None:
+        body['phoneNumber'] = item.phoneNumber
+    if item.inStock != None:
+        body['inStock'] = item.inStock
+    if item.mondayOpeningHours != None:
+        body['mondayOpeningHours'] = item.mondayOpeningHours
+    if item.mondayClosingHours != None:
+        body['mondayClosingHours'] = item.mondayClosingHours
+    if item.tuesdayOpeningHours != None:
+        body['tuesdayOpeningHours'] = item.tuesdayOpeningHours
+    if item.tuesdayClosingHours != None:
+        body['tuesdayClosingHours'] = item.tuesdayClosingHours
+    if item.wednesdayOpeningHours != None:
+        body['wednesdayOpeningHours'] = item.wednesdayOpeningHours
+    if item.wednesdayClosingHours != None:
+        body['wednesdayClosingHours'] = item.wednesdayClosingHours
+    if item.thursdayOpeningHours != None:
+        body['thursdayOpeningHours'] = item.thursdayOpeningHours
+    if item.thursdayClosingHours != None:
+        body['thursdayClosingHours'] = item.thursdayClosingHours
+    if item.fridayOpeningHours != None:
+        body['fridayOpeningHours'] = item.fridayOpeningHours
+    if item.fridayClosingHours != None:
+        body['fridayClosingHours'] = item.fridayClosingHours
+    if item.saturdayOpeningHours != None:
+        body['saturdayOpeningHours'] = item.saturdayOpeningHours
+    if item.saturdayClosingHours != None:
+        body['saturdayClosingHours'] = item.saturdayClosingHours
+    if item.sundayOpeningHours != None:
+        body['sundayOpeningHours'] = item.sundayOpeningHours
+    if item.sundayClosingHours != None:
+        body['sundayClosingHours'] = item.sundayClosingHours
+    
+    print(f"Body: {body}")
+
+    await es.index( 
+        index='items',
+        id=item.itemId,
+        body=body
+    )
+    return {'Message': 'Success'}
+
+class DeleteModel(BaseModel):
+    itemId: str
+    admin_email: str
+
+@app.post('/delete')
+async def delete_document(item: DeleteModel):
+    # if item.admin_email == os.environ.get('FIREBASE_AUTH'):
+    if item.admin_email == 'admin@localhost.com':
+        await es.delete(
+            index='items',
+            id=item.itemId
+        )
+    return {'Message': 'Successful Delete'}
 
 @app.on_event("shutdown")
 async def app_shutdown():
