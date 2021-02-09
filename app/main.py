@@ -369,6 +369,75 @@ async def index_es(item: Item):
     )
     return resp
 
+@app.post('/update')
+async def update_index(item: Item):
+    body = {}
+    if item.itemId != None:
+        body['itemId'] = item.itemId
+    if item.userId != None:
+        body['userId'] = item.userId
+    if item.images != None:
+        body['images'] = item.images
+    if item.title != None:
+        body['title'] = item.title
+    if item.description != None:
+        body['description'] = item.description
+    if item.price != None:
+        body['price'] = item.price
+    if item.category != None:
+        body['categogry'] = item.category
+    if item.subCategory != None:
+        body['subCategory'] = item.subCategory
+    if item.location != None:
+        body['location'] = item.location
+    if item.locationDescription != None:
+        body['locationDescription'] = item.locationDescription
+    if item.businessName != None: 
+        body['businessName'] = item.businessName
+    if item.businessDescription != None:
+        body['businessDescription'] = item.businessDescription
+    if item.phoneNumber != None:
+        body['phoneNumber'] = item.phoneNumber
+    if item.inStock != None:
+        body['inStock'] = item.inStock
+    if item.mondayOpeningHours != None:
+        body['mondayOpeningHours'] = item.mondayOpeningHours
+    if item.mondayClosingHours != None:
+        body['mondayClosingHours'] = item.mondayClosingHours
+    if item.tuesdayOpeningHours != None:
+        body['tuesdayOpeningHours'] = item.tuesdayOpeningHours
+    if item.tuesdayClosingHours != None:
+        body['tuesdayClosingHours'] = item.tuesdayClosingHours
+    if item.wednesdayOpeningHours != None:
+        body['wednesdayOpeningHours'] = item.wednesdayOpeningHours
+    if item.wednesdayClosingHours != None:
+        body['wednesdayClosingHours'] = item.wednesdayClosingHours
+    if item.thursdayOpeningHours != None:
+        body['thursdayOpeningHours'] = item.thursdayOpeningHours
+    if item.thursdayClosingHours != None:
+        body['thursdayClosingHours'] = item.thursdayClosingHours
+    if item.fridayOpeningHours != None:
+        body['fridayOpeningHours'] = item.fridayOpeningHours
+    if item.fridayClosingHours != None:
+        body['fridayClosingHours'] = item.fridayClosingHours
+    if item.saturdayOpeningHours != None:
+        body['saturdayOpeningHours'] = item.saturdayOpeningHours
+    if item.saturdayClosingHours != None:
+        body['saturdayClosingHours'] = item.saturdayClosingHours
+    if item.sundayOpeningHours != None:
+        body['sundayOpeningHours'] = item.sundayOpeningHours
+    if item.sundayClosingHours != None:
+        body['sundayClosingHours'] = item.sundayClosingHours
+    
+    resp = await es.update(
+        index='items',
+        id=item.itemId,
+        body={
+            "doc": body
+        }
+    )
+    return resp
+
 class DeleteModel(BaseModel):
     itemId: str
     admin_email: str
