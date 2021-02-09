@@ -30,6 +30,7 @@ class Location(BaseModel):
 
 class Item(BaseModel):
     itemId: str
+    userId: str
     images: Optional[List[str]]
     title: Optional[str]
     description: Optional[str]
@@ -40,22 +41,22 @@ class Item(BaseModel):
     locationDescription: Optional[str] 
     businessName: Optional[str]
     businessDescription: Optional[str]
-    phoneNumber: Optional[int]
+    phoneNumber: Optional[str]
     inStock: Optional[bool]
-    mondayOpeningHours: Optional[datetime]
-    mondayClosingHours:  Optional[datetime]
-    tuesdayOpeningHours:  Optional[datetime]  
-    tuesdayClosingHours:  Optional[datetime]
-    wednesdayOpeningHours:  Optional[datetime] 
-    wednesdayClosingHours:  Optional[datetime]
-    thursdayOpeningHours:  Optional[datetime]
-    thursdayClosingHours:  Optional[datetime] 
-    fridayOpeningHours:  Optional[datetime]   
-    fridayClosingHours:  Optional[datetime]     
-    saturdayOpeningHours:  Optional[datetime]
-    saturdayClosingHours:  Optional[datetime]
-    sundayOpeningHours:  Optional[datetime] 
-    sundayClosingHours:  Optional[datetime]
+    mondayOpeningHours: Optional[str]
+    mondayClosingHours:  Optional[str]
+    tuesdayOpeningHours:  Optional[str]  
+    tuesdayClosingHours:  Optional[str]
+    wednesdayOpeningHours:  Optional[str] 
+    wednesdayClosingHours:  Optional[str]
+    thursdayOpeningHours:  Optional[str]
+    thursdayClosingHours:  Optional[str] 
+    fridayOpeningHours:  Optional[str]   
+    fridayClosingHours:  Optional[str]     
+    saturdayOpeningHours:  Optional[str]
+    saturdayClosingHours:  Optional[str]
+    sundayOpeningHours:  Optional[str] 
+    sundayClosingHours:  Optional[str]
 
 es = AsyncElasticsearch()
 
@@ -304,6 +305,10 @@ async def search_detail(
 @app.post('/index')
 async def index_es(item: Item):
     body = {}
+    if item.itemId != None:
+        body['itemId'] = item.itemId
+    if item.userId != None:
+        body['userId'] = item.userId
     if item.images != None:
         body['images'] = item.images
     if item.title != None:
@@ -356,15 +361,13 @@ async def index_es(item: Item):
         body['sundayOpeningHours'] = item.sundayOpeningHours
     if item.sundayClosingHours != None:
         body['sundayClosingHours'] = item.sundayClosingHours
-    
-    print(f"Body: {body}")
 
-    await es.index( 
+    resp = await es.index( 
         index='items',
         id=item.itemId,
         body=body
     )
-    return {'Message': 'Success'}
+    return resp
 
 class DeleteModel(BaseModel):
     itemId: str
