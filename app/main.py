@@ -299,7 +299,7 @@ async def search_detail(
             sort = result['sort'][0]
             source['distance'] = sort
             parsed_results.append(source)
-        bounds = results['hits']['aggregations']['map_zoom']['bounds']
+        bounds = results['aggregations']['map_zoom']['bounds']
         return {
             'items': parsed_results,
             'bounds': bounds,
@@ -374,7 +374,7 @@ async def search_detail(
             sort = result['sort'][0]
             source['distance'] = sort
             parsed_results.append(source)
-        bounds = results['hits']['aggregations']['map_zoom']['bounds']
+        bounds = results['aggregations']['map_zoom']['bounds']
         return {
             'items': parsed_results,
             'bounds': bounds,
