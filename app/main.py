@@ -299,8 +299,10 @@ async def search_detail(
             sort = result['sort'][0]
             source['distance'] = sort
             parsed_results.append(source)
+        bounds = results['hits']['aggregations']['map_zoom']['bounds']
         return {
-            'items': parsed_results
+            'items': parsed_results,
+            'bounds': bounds,
         }
     else:
         # TODO: fetch the key fron env variables in production
@@ -372,8 +374,10 @@ async def search_detail(
             sort = result['sort'][0]
             source['distance'] = sort
             parsed_results.append(source)
+        bounds = results['hits']['aggregations']['map_zoom']['bounds']
         return {
-            'items': parsed_results
+            'items': parsed_results,
+            'bounds': bounds,
         }
 
 @app.post('/index')
