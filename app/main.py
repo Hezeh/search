@@ -296,6 +296,8 @@ async def search_detail(
         )
         for result in results['hits']['hits']:
             source = result['_source']
+            sort = result['sort'][0]
+            source['distance'] = sort
             parsed_results.append(source)
         return {
             'items': parsed_results
@@ -367,6 +369,8 @@ async def search_detail(
         )
         for result in results['hits']['hits']:
             source = result['_source']
+            sort = result['sort'][0]
+            source['distance'] = sort
             parsed_results.append(source)
         return {
             'items': parsed_results
