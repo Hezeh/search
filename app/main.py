@@ -392,7 +392,10 @@ async def index_es(item: Item):
     if item.subCategory != None:
         body['subCategory'] = item.subCategory
     if item.location != None:
-        body['location'] = item.location
+        body['location'] = {
+            "lat": item.location["_latitude"],
+            "lon": item.location["_longitude"]
+        }
     if item.locationDescription != None:
         body['locationDescription'] = item.locationDescription
     if item.businessName != None: 
@@ -459,7 +462,10 @@ async def update_index(item: Item):
     if item.subCategory != None:
         body['subCategory'] = item.subCategory
     if item.location != None:
-        body['location'] = item.location
+        body['location'] = {
+            "lat": item.location["_latitude"],
+            "lon": item.location["_longitude"]
+        }
     if item.locationDescription != None:
         body['locationDescription'] = item.locationDescription
     if item.businessName != None: 
