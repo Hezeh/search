@@ -226,46 +226,72 @@ async def search_suggestions(q: str, country_code: str, language_code: str):
         'suggestions': suggestions
     }
 
-# @app.get('/gram')
-# async def ngram(q: str):
-#     suggestions = []
-#     search_results = es.search(
-#         index='items-ken-en',
-#         body={
-#             "query": {
-#                 "match_phrase_prefix": {
-#                     "title": f"{q}"
-#                 }
-#             }
-#         }
-#     )
-#     # Extract the suggestions
-#     return suggestions
-
 @app.get('/search')
 async def search_detail(
-                        q: str, 
-                        country_code: str, 
-                        language_code: str,
+                        q: str,
                         lat: float,
                         lon: float,
                         user_agent: Optional[str] = Header(None), 
                         x_forwarded_for: Optional[str] = Header(None),
                        ):
-    # If the user has allowed ip access: fetch the data else: use ip geolocation
+    # If the user has allowed location access: fetch the data else: use ip geolocation
     parsed_results = []
     if lat and lon:
         results = await es.search(
-        index = f"items-{country_code}-{language_code}",
+        index = "items",
         body = {
+        "track_scores": True,
+        "query": {
+            "function_score": {
+            "score_mode": "sum", 
             "query": {
-            "multi_match": {
+                "multi_match": {
                 "query": q,
-                "type": "best_fields",
-                "fields": ["title", "description"]
+                "fields": [
+                    "title^10",
+                    "description"
+                ],
+                "tie_breaker": 0.3
                 }
-            }
             },
+            "functions": [
+                {
+                "weight": 2.1,
+                "gauss": {
+                    "location": {
+                    "origin": {
+                        "lat": lat,
+                        "lon": lon
+                    },
+                    "offset": "0km",
+                    "scale": "4km"
+                    }
+                }
+                }
+            ]
+            }
+        },
+        "sort": [
+            {
+            "_geo_distance": {
+                "location": {
+                    "lat": lat,
+                    "lon": lon
+                },
+                "order": "asc",
+                "unit": "km",
+                "ignore_unmapped": True
+            }
+            }
+        ],
+        "aggs": {
+            "map_zoom": {
+            "geo_bounds": {
+                "field": "location"
+            }
+            }
+        }
+        },
         size=20,
         )
         for result in results['hits']['hits']:
@@ -283,16 +309,60 @@ async def search_detail(
         latitude = ip_response['latitude']
         longitude = ip_response['longitude']
         results = await es.search(
-            index = f"items-{country_code}-{language_code}",
-            body = {
-                "query": {
-                    "multi_match": {
-                        "query": q,
-                        "type": "best_fields",
-                        "fields": ["title", "description"],
-                    }
+        index = f"items",
+        body = {
+        "track_scores": True,
+        "query": {
+            "function_score": {
+            "score_mode": "sum", 
+            "query": {
+                "multi_match": {
+                "query": q,
+                "fields": [
+                    "title^10",
+                    "description"
+                ],
+                "tie_breaker": 0.3
                 }
             },
+            "functions": [
+                {
+                "weight": 2.1,
+                "gauss": {
+                    "location": {
+                    "origin": {
+                        "lat": latitude,
+                        "lon": longitude
+                    },
+                    "offset": "0km",
+                    "scale": "4km"
+                    }
+                }
+                }
+            ]
+            }
+        },
+        "sort": [
+            {
+            "_geo_distance": {
+                "location": {
+                    "lat": lat,
+                    "lon": longitude
+                },
+                "order": "asc",
+                "unit": "km",
+                "ignore_unmapped": True
+            }
+            }
+        ],
+        "aggs": {
+            "map_zoom": {
+            "geo_bounds": {
+                "field": "location"
+            }
+            }
+        }
+        },
             size=20,
         )
         for result in results['hits']['hits']:
