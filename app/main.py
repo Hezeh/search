@@ -71,10 +71,10 @@ async def ping():
     return resp
 
 @app.get('/suggestions')
-async def search_suggestions(q: str, country_code: str, language_code: str):
+async def search_suggestions(q: str):
     suggestions = []
     search = await es.search(
-       index=f'items-{country_code}-{language_code}',
+       index=f'items',
        body={
             "_source": False,
             "suggest": {
