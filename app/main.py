@@ -57,6 +57,14 @@ class Item(BaseModel):
     saturdayClosingHours:  Optional[str]
     sundayOpeningHours:  Optional[str] 
     sundayClosingHours:  Optional[str]
+    businessPhotos: Optional[List[str]]
+    isMondayOpen: Optional[bool]
+    isTuesdayOpen: Optional[bool]
+    isWednesdayOpen: Optional[bool]
+    isThursdayOpen: Optional[bool]
+    isFridayOpen: Optional[bool]
+    isSaturdayOpen: Optional[bool]
+    isSundayOpen: Optional[bool]
 
 es = AsyncElasticsearch()
 
@@ -442,6 +450,22 @@ async def index_es(item: Item):
         body['sundayOpeningHours'] = item.sundayOpeningHours
     if item.sundayClosingHours != None:
         body['sundayClosingHours'] = item.sundayClosingHours
+    if item.businessPhotos != None:
+        body['businessPhotos'] = item.businessPhotos
+    if item.isMondayOpen != None:
+        body['isMondayOpen'] = item.isMondayOpen
+    if item.isTuesdayOpen != None:
+        body['isTuesdayOpen'] = item.isTuesdayOpen
+    if item.isWednesdayOpen != None:
+        body['isWednesdayOpen'] = item.isWednesdayOpen
+    if item.isThursdayOpen != None:
+        body['isThursdayOpen'] = item.isThursdayOpen
+    if item.isFridayOpen != None:
+        body['isFridayOpen'] = item.isFridayOpen
+    if item.isSaturdayOpen != None:
+        body['isSaturdayOpen'] = item.isSaturdayOpen
+    if item.isSundayOpen != None:
+        body['isSundayOpen'] = item.isSundayOpen
 
     resp = await es.index( 
         index='items',
@@ -512,6 +536,22 @@ async def update_index(item: Item):
         body['sundayOpeningHours'] = item.sundayOpeningHours
     if item.sundayClosingHours != None:
         body['sundayClosingHours'] = item.sundayClosingHours
+    if item.businessPhotos != None:
+        body['businessPhotos'] = item.businessPhotos
+    if item.isMondayOpen != None:
+        body['isMondayOpen'] = item.isMondayOpen
+    if item.isTuesdayOpen != None:
+        body['isTuesdayOpen'] = item.isTuesdayOpen
+    if item.isWednesdayOpen != None:
+        body['isWednesdayOpen'] = item.isWednesdayOpen
+    if item.isThursdayOpen != None:
+        body['isThursdayOpen'] = item.isThursdayOpen
+    if item.isFridayOpen != None:
+        body['isFridayOpen'] = item.isFridayOpen
+    if item.isSaturdayOpen != None:
+        body['isSaturdayOpen'] = item.isSaturdayOpen
+    if item.isSundayOpen != None:
+        body['isSundayOpen'] = item.isSundayOpen
     
     resp = await es.update(
         index='items',
