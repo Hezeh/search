@@ -57,7 +57,7 @@ class Item(BaseModel):
     saturdayClosingHours:  Optional[str]
     sundayOpeningHours:  Optional[str] 
     sundayClosingHours:  Optional[str]
-    businessPhotos: Optional[List[str]]
+    businessProfilePhoto: Optional[str]
     isMondayOpen: Optional[bool]
     isTuesdayOpen: Optional[bool]
     isWednesdayOpen: Optional[bool]
@@ -450,8 +450,6 @@ async def index_es(item: Item):
         body['sundayOpeningHours'] = item.sundayOpeningHours
     if item.sundayClosingHours != None:
         body['sundayClosingHours'] = item.sundayClosingHours
-    if item.businessPhotos != None:
-        body['businessPhotos'] = item.businessPhotos
     if item.isMondayOpen != None:
         body['isMondayOpen'] = item.isMondayOpen
     if item.isTuesdayOpen != None:
@@ -466,6 +464,8 @@ async def index_es(item: Item):
         body['isSaturdayOpen'] = item.isSaturdayOpen
     if item.isSundayOpen != None:
         body['isSundayOpen'] = item.isSundayOpen
+    if item.businessProfilePhoto != None:
+        body['businessProfilePhoto'] = item.businessProfilePhoto
 
     resp = await es.index( 
         index='items',
@@ -537,7 +537,7 @@ async def update_index(item: Item):
     if item.sundayClosingHours != None:
         body['sundayClosingHours'] = item.sundayClosingHours
     if item.businessPhotos != None:
-        body['businessPhotos'] = item.businessPhotos
+        body['businessProfilePhoto'] = item.businessProfilePhoto
     if item.isMondayOpen != None:
         body['isMondayOpen'] = item.isMondayOpen
     if item.isTuesdayOpen != None:
