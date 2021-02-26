@@ -585,6 +585,7 @@ async def item_viewstream(request: Request):
     body = await request.body()
     json_body = json.loads(body)
     message_body = json_body['message']
+    print(message_body)
     viewId = json_body['message']['viewId']
     resp = await item_viewstream_index(viewId, message_body)
     return resp
@@ -596,6 +597,9 @@ async def item_viewstream_index(id, body):
         body=body
     )
     return resp    
+
+@app.post('/merchant-viewstream')
+# async def item
 
 @app.on_event("shutdown")
 async def app_shutdown():
