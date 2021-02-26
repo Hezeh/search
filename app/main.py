@@ -1,12 +1,11 @@
 import os
 
-from fastapi import FastAPI, Header
+from fastapi import FastAPI, Header, Request
 from elasticsearch import AsyncElasticsearch
 from typing import List, Optional
 import requests
 from pydantic import BaseModel
 import json
-from datetime import datetime
 from geojson import Point
 
 app = FastAPI()
@@ -581,6 +580,22 @@ async def recommendations(deviceId: str, lat: float, lon: float):
     # Get recommedations for a specific device
     return {'Message': "Recommendations"}
 
+@app.post('/item-viewstream')
+async def item_viewstream(request: Request):
+    body = await request.body()
+    json_body = json.loads(body)
+    message_body = json_body['message']
+    viewId = json_body['message']['viewId']
+    resp = await item_viewstream_index(viewId, message_body)
+    return resp
+
+async def item_viewstream_index(id, body):
+    resp = await es.index( 
+        index='item-viewstream',
+        id=id,
+        body=body
+    )
+    return resp    
 
 @app.on_event("shutdown")
 async def app_shutdown():
