@@ -576,6 +576,12 @@ async def delete_document(item: DeleteModel):
         )
     return {'Message': 'Successful Delete'}
 
+@app.get('/recommendations')
+async def recommendations(deviceId: str, lat: float, lon: float):
+    # Get recommedations for a specific device
+    return {'Message': "Recommendations"}
+
+
 @app.on_event("shutdown")
 async def app_shutdown():
     await es.close()
