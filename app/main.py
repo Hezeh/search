@@ -597,7 +597,7 @@ async def item_viewstream(request: Request, response: Response):
     print(f"Payload {payload}")
     json_payload = json.loads(payload)
     print(f"Json Payload: {json_payload}")
-    viewId = payload["viewId"]
+    viewId = json_payload["viewId"]
     resp = await item_viewstream_index(viewId, json_payload)
     return resp
 
