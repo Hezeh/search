@@ -584,8 +584,6 @@ async def recommendations(deviceId: str, lat: float, lon: float):
 @app.post('/item-viewstream', status_code=200)
 async def item_viewstream(request: Request, response: Response):
     envelope = await request.body()
-    
-    print(f"This is the envelope: {envelope}")
     if not envelope:
         msg = "no Pub/Sub message received"
         print(f"error: {msg}")
@@ -594,9 +592,7 @@ async def item_viewstream(request: Request, response: Response):
     
     pubsub_message = json.loads(envelope.decode('utf-8'))
     payload = base64.b64decode(pubsub_message["message"]["data"])
-    print(f"Payload {payload}")
     json_payload = json.loads(payload)
-    print(f"Json Payload: {json_payload}")
     viewId = json_payload["viewId"]
     resp = await item_viewstream_index(viewId, json_payload)
     return resp
