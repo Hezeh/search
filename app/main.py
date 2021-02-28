@@ -591,23 +591,12 @@ async def item_viewstream(request: Request, response: Response):
         response.status_code = status.HTTP_400_BAD_REQUEST
         return f" Bad Request: {msg}"
     
-    if not isinstance(envelope, dict) or "message" not in envelope:
-        msg = "invalid Pub/Sub message format"
-        print(f"error: {msg}")
-        print(envelope)
-        response.status_code = status.HTTP_400_BAD_REQUEST
-        return f"Bad Request: {msg}"
-    
     pubsub_message = envelope["message"]
-
-    if isinstance(pubsub_message, dict) and "data" in pubsub_message:
-        body = base64.b64decode(pubsub_message["data"]).decode("utf-8")
-        json_body = json.loads(body)
-        viewId = json_body["viewId"]
-        resp = await item_viewstream_index(viewId, json_body)
-        return resp
-
-    return ""
+    body = base64.b64decode(pubsub_message["data"]).decode("utf-8")
+    json_body = json.loads(body)
+    viewId = json_body["viewId"]
+    resp = await item_viewstream_index(viewId, json_body)
+    return resp
 
 async def item_viewstream_index(id, body):
     resp = await es.index( 
