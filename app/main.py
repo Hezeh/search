@@ -1,12 +1,13 @@
 import os
 
-from fastapi import FastAPI, Header, Request
+from fastapi import FastAPI, Header, Request, Response, status
 from elasticsearch import AsyncElasticsearch
 from typing import List, Optional
 import requests
 from pydantic import BaseModel
 import json
 from geojson import Point
+import base64
 
 app = FastAPI()
 
@@ -580,15 +581,31 @@ async def recommendations(deviceId: str, lat: float, lon: float):
     # Get recommedations for a specific device
     return {'Message': "Recommendations"}
 
-@app.post('/item-viewstream')
-async def item_viewstream(request: Request):
-    body = await request.body()
-    json_body = json.loads(body)
-    message_body = json_body['message']
-    print(message_body)
-    viewId = json_body['message']['viewId']
-    resp = await item_viewstream_index(viewId, message_body)
-    return resp
+@app.post('/item-viewstream', status_code=200)
+async def item_viewstream(request: Request, response: Response):
+    envelope = await request.body()
+    if not envelope:
+        msg = "no Pub/Sub message received"
+        print(f"error: {msg}")
+        response.status_code = status.HTTP_400_BAD_REQUEST
+        return f" Bad Request: {msg}"
+    
+    if not isinstance(envelope, dict) or "message" not in envelope:
+        msg = "invalid Pub/Sub message format"
+        print(f"error: {msg}")
+        response.status_code = status.HTTP_400_BAD_REQUEST
+        return f"Bad Request: {msg}"
+    
+    pubsub_message = envelope["message"]
+
+    if isinstance(pubsub_message, dict) and "data" in pubsub_message:
+        body = base64.b64decode(pubsub_message["data"]).decode("utf-8")
+        json_body = json.loads(body)
+        viewId = json_body["viewId"]
+        resp = await item_viewstream_index(viewId, json_body)
+        return resp
+
+    return ""
 
 async def item_viewstream_index(id, body):
     resp = await es.index( 
