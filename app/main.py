@@ -596,6 +596,7 @@ async def item_viewstream(request: Request, response: Response):
     payload = base64.b64decode(pubsub_message["message"]["data"])
     print(f"Payload {payload}")
     json_payload = json.loads(payload)
+    print(f"Json Payload: {json_payload}")
     viewId = payload["viewId"]
     resp = await item_viewstream_index(viewId, json_payload)
     return resp
