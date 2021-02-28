@@ -584,6 +584,7 @@ async def recommendations(deviceId: str, lat: float, lon: float):
 @app.post('/item-viewstream', status_code=200)
 async def item_viewstream(request: Request, response: Response):
     envelope = await request.body()
+    
     print(f"This is the envelope: {envelope}")
     if not envelope:
         msg = "no Pub/Sub message received"
@@ -591,11 +592,10 @@ async def item_viewstream(request: Request, response: Response):
         response.status_code = status.HTTP_400_BAD_REQUEST
         return f" Bad Request: {msg}"
     
-    pubsub_message = envelope["message"]
-    body = base64.b64decode(pubsub_message["data"]).decode("utf-8")
-    json_body = json.loads(body)
-    viewId = json_body["viewId"]
-    resp = await item_viewstream_index(viewId, json_body)
+    pubsub_message = json.loads(envelope.decode('utf-8'))
+    payload = base64.b64decode(pubsub_message["message"]["data"])
+    viewId = payload["viewId"]
+    resp = await item_viewstream_index(viewId, payload)
     return resp
 
 async def item_viewstream_index(id, body):
