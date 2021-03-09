@@ -243,6 +243,18 @@ async def search_detail(
                         x_forwarded_for: Optional[str] = Header(None),
                        ):
     # If the user has allowed location access: fetch the data else: use ip geolocation
+    # TODO: Incorporate click-through rate, item dwell-time, number of recent searches/popularity
+    # TODO: Incorporate brand
+    # TODO: Query segmentation
+    # TODO: Query Understanding
+    # TODO: Knowledge Graph
+    # TODO: Taxonomy
+    # TODO: Synonyms
+    # TODO: bool; boost term matches & and improve ranking criteria based on category & subCategory
+    # TODO: Acronym
+    # TODO: Fuzzy Matching
+    # TODO: Category recommendation
+    # TODO: Matching Criteria & Ranking Criteria
     parsed_results = []
     if lat and lon:
         results = await es.search(
@@ -256,8 +268,10 @@ async def search_detail(
                 "multi_match": {
                 "query": q,
                 "fields": [
-                    "title^10",
-                    "description"
+                    "title^20",
+                    "description^15",
+                    "category^5"
+                    "subCategory^18"
                 ],
                 "tie_breaker": 0.3
                 }
@@ -388,193 +402,235 @@ async def search_detail(
             'bounds': bounds,
         }
 
-@app.post('/index')
-async def index_es(item: Item):
-    body = {}
-    if item.itemId != None:
-        body['itemId'] = item.itemId
-    if item.userId != None:
-        body['userId'] = item.userId
-    if item.images != None:
-        body['images'] = item.images
-    if item.title != None:
-        body['title'] = item.title
-    if item.description != None:
-        body['description'] = item.description
-    if item.price != None:
-        body['price'] = item.price
-    if item.category != None:
-        body['categogry'] = item.category
-    if item.subCategory != None:
-        body['subCategory'] = item.subCategory
-    if item.location != None:
-        body['location'] = {
-            "lat": item.location["_latitude"],
-            "lon": item.location["_longitude"]
-        }
-    if item.locationDescription != None:
-        body['locationDescription'] = item.locationDescription
-    if item.businessName != None: 
-        body['businessName'] = item.businessName
-    if item.businessDescription != None:
-        body['businessDescription'] = item.businessDescription
-    if item.phoneNumber != None:
-        body['phoneNumber'] = item.phoneNumber
-    if item.inStock != None:
-        body['inStock'] = item.inStock
-    if item.mondayOpeningHours != None:
-        body['mondayOpeningHours'] = item.mondayOpeningHours
-    if item.mondayClosingHours != None:
-        body['mondayClosingHours'] = item.mondayClosingHours
-    if item.tuesdayOpeningHours != None:
-        body['tuesdayOpeningHours'] = item.tuesdayOpeningHours
-    if item.tuesdayClosingHours != None:
-        body['tuesdayClosingHours'] = item.tuesdayClosingHours
-    if item.wednesdayOpeningHours != None:
-        body['wednesdayOpeningHours'] = item.wednesdayOpeningHours
-    if item.wednesdayClosingHours != None:
-        body['wednesdayClosingHours'] = item.wednesdayClosingHours
-    if item.thursdayOpeningHours != None:
-        body['thursdayOpeningHours'] = item.thursdayOpeningHours
-    if item.thursdayClosingHours != None:
-        body['thursdayClosingHours'] = item.thursdayClosingHours
-    if item.fridayOpeningHours != None:
-        body['fridayOpeningHours'] = item.fridayOpeningHours
-    if item.fridayClosingHours != None:
-        body['fridayClosingHours'] = item.fridayClosingHours
-    if item.saturdayOpeningHours != None:
-        body['saturdayOpeningHours'] = item.saturdayOpeningHours
-    if item.saturdayClosingHours != None:
-        body['saturdayClosingHours'] = item.saturdayClosingHours
-    if item.sundayOpeningHours != None:
-        body['sundayOpeningHours'] = item.sundayOpeningHours
-    if item.sundayClosingHours != None:
-        body['sundayClosingHours'] = item.sundayClosingHours
-    if item.isMondayOpen != None:
-        body['isMondayOpen'] = item.isMondayOpen
-    if item.isTuesdayOpen != None:
-        body['isTuesdayOpen'] = item.isTuesdayOpen
-    if item.isWednesdayOpen != None:
-        body['isWednesdayOpen'] = item.isWednesdayOpen
-    if item.isThursdayOpen != None:
-        body['isThursdayOpen'] = item.isThursdayOpen
-    if item.isFridayOpen != None:
-        body['isFridayOpen'] = item.isFridayOpen
-    if item.isSaturdayOpen != None:
-        body['isSaturdayOpen'] = item.isSaturdayOpen
-    if item.isSundayOpen != None:
-        body['isSundayOpen'] = item.isSundayOpen
-    if item.businessProfilePhoto != None:
-        body['businessProfilePhoto'] = item.businessProfilePhoto
-
-    resp = await es.index( 
+async def item_index(id, body):
+    resp = await es.index(
         index='items',
-        id=item.itemId,
+        id=id,
         body=body
     )
+
+@app.post('/index')
+async def index_es(request: Request):
+    envelope = await request.body()
+    pubsub_message = json.loads(envelope.decode('utf-8'))
+    payload = base64.b64decode(pubsub_message["message"]["data"])
+    json_payload = json.loads(payload)
+    id = json_payload["itemId"]
+    resp = await item_index(id, json_payload)
+    # body = {}
+    # if item.itemId != None:
+    #     body['itemId'] = item.itemId
+    # if item.userId != None:
+    #     body['userId'] = item.userId
+    # if item.images != None:
+    #     body['images'] = item.images
+    # if item.title != None:
+    #     body['title'] = item.title
+    # if item.description != None:
+    #     body['description'] = item.description
+    # if item.price != None:
+    #     body['price'] = item.price
+    # if item.category != None:
+    #     body['categogry'] = item.category
+    # if item.subCategory != None:
+    #     body['subCategory'] = item.subCategory
+    # if item.location != None:
+    #     body['location'] = {
+    #         "lat": item.location["_latitude"],
+    #         "lon": item.location["_longitude"]
+    #     }
+    # if item.locationDescription != None:
+    #     body['locationDescription'] = item.locationDescription
+    # if item.businessName != None: 
+    #     body['businessName'] = item.businessName
+    # if item.businessDescription != None:
+    #     body['businessDescription'] = item.businessDescription
+    # if item.phoneNumber != None:
+    #     body['phoneNumber'] = item.phoneNumber
+    # if item.inStock != None:
+    #     body['inStock'] = item.inStock
+    # if item.mondayOpeningHours != None:
+    #     body['mondayOpeningHours'] = item.mondayOpeningHours
+    # if item.mondayClosingHours != None:
+    #     body['mondayClosingHours'] = item.mondayClosingHours
+    # if item.tuesdayOpeningHours != None:
+    #     body['tuesdayOpeningHours'] = item.tuesdayOpeningHours
+    # if item.tuesdayClosingHours != None:
+    #     body['tuesdayClosingHours'] = item.tuesdayClosingHours
+    # if item.wednesdayOpeningHours != None:
+    #     body['wednesdayOpeningHours'] = item.wednesdayOpeningHours
+    # if item.wednesdayClosingHours != None:
+    #     body['wednesdayClosingHours'] = item.wednesdayClosingHours
+    # if item.thursdayOpeningHours != None:
+    #     body['thursdayOpeningHours'] = item.thursdayOpeningHours
+    # if item.thursdayClosingHours != None:
+    #     body['thursdayClosingHours'] = item.thursdayClosingHours
+    # if item.fridayOpeningHours != None:
+    #     body['fridayOpeningHours'] = item.fridayOpeningHours
+    # if item.fridayClosingHours != None:
+    #     body['fridayClosingHours'] = item.fridayClosingHours
+    # if item.saturdayOpeningHours != None:
+    #     body['saturdayOpeningHours'] = item.saturdayOpeningHours
+    # if item.saturdayClosingHours != None:
+    #     body['saturdayClosingHours'] = item.saturdayClosingHours
+    # if item.sundayOpeningHours != None:
+    #     body['sundayOpeningHours'] = item.sundayOpeningHours
+    # if item.sundayClosingHours != None:
+    #     body['sundayClosingHours'] = item.sundayClosingHours
+    # if item.isMondayOpen != None:
+    #     body['isMondayOpen'] = item.isMondayOpen
+    # if item.isTuesdayOpen != None:
+    #     body['isTuesdayOpen'] = item.isTuesdayOpen
+    # if item.isWednesdayOpen != None:
+    #     body['isWednesdayOpen'] = item.isWednesdayOpen
+    # if item.isThursdayOpen != None:
+    #     body['isThursdayOpen'] = item.isThursdayOpen
+    # if item.isFridayOpen != None:
+    #     body['isFridayOpen'] = item.isFridayOpen
+    # if item.isSaturdayOpen != None:
+    #     body['isSaturdayOpen'] = item.isSaturdayOpen
+    # if item.isSundayOpen != None:
+    #     body['isSundayOpen'] = item.isSundayOpen
+    # if item.businessProfilePhoto != None:
+    #     body['businessProfilePhoto'] = item.businessProfilePhoto
+
+    # resp = await es.index( 
+    #     index='items',
+    #     id=item.itemId,
+    #     body=body
+    # )
     return resp
 
-@app.post('/update')
-async def update_index(item: Item):
-    body = {}
-    if item.itemId != None:
-        body['itemId'] = item.itemId
-    if item.userId != None:
-        body['userId'] = item.userId
-    if item.images != None:
-        body['images'] = item.images
-    if item.title != None:
-        body['title'] = item.title
-    if item.description != None:
-        body['description'] = item.description
-    if item.price != None:
-        body['price'] = item.price
-    if item.category != None:
-        body['categogry'] = item.category
-    if item.subCategory != None:
-        body['subCategory'] = item.subCategory
-    if item.location != None:
-        body['location'] = {
-            "lat": item.location["_latitude"],
-            "lon": item.location["_longitude"]
-        }
-    if item.locationDescription != None:
-        body['locationDescription'] = item.locationDescription
-    if item.businessName != None: 
-        body['businessName'] = item.businessName
-    if item.businessDescription != None:
-        body['businessDescription'] = item.businessDescription
-    if item.phoneNumber != None:
-        body['phoneNumber'] = item.phoneNumber
-    if item.inStock != None:
-        body['inStock'] = item.inStock
-    if item.mondayOpeningHours != None:
-        body['mondayOpeningHours'] = item.mondayOpeningHours
-    if item.mondayClosingHours != None:
-        body['mondayClosingHours'] = item.mondayClosingHours
-    if item.tuesdayOpeningHours != None:
-        body['tuesdayOpeningHours'] = item.tuesdayOpeningHours
-    if item.tuesdayClosingHours != None:
-        body['tuesdayClosingHours'] = item.tuesdayClosingHours
-    if item.wednesdayOpeningHours != None:
-        body['wednesdayOpeningHours'] = item.wednesdayOpeningHours
-    if item.wednesdayClosingHours != None:
-        body['wednesdayClosingHours'] = item.wednesdayClosingHours
-    if item.thursdayOpeningHours != None:
-        body['thursdayOpeningHours'] = item.thursdayOpeningHours
-    if item.thursdayClosingHours != None:
-        body['thursdayClosingHours'] = item.thursdayClosingHours
-    if item.fridayOpeningHours != None:
-        body['fridayOpeningHours'] = item.fridayOpeningHours
-    if item.fridayClosingHours != None:
-        body['fridayClosingHours'] = item.fridayClosingHours
-    if item.saturdayOpeningHours != None:
-        body['saturdayOpeningHours'] = item.saturdayOpeningHours
-    if item.saturdayClosingHours != None:
-        body['saturdayClosingHours'] = item.saturdayClosingHours
-    if item.sundayOpeningHours != None:
-        body['sundayOpeningHours'] = item.sundayOpeningHours
-    if item.sundayClosingHours != None:
-        body['sundayClosingHours'] = item.sundayClosingHours
-    if item.businessPhotos != None:
-        body['businessProfilePhoto'] = item.businessProfilePhoto
-    if item.isMondayOpen != None:
-        body['isMondayOpen'] = item.isMondayOpen
-    if item.isTuesdayOpen != None:
-        body['isTuesdayOpen'] = item.isTuesdayOpen
-    if item.isWednesdayOpen != None:
-        body['isWednesdayOpen'] = item.isWednesdayOpen
-    if item.isThursdayOpen != None:
-        body['isThursdayOpen'] = item.isThursdayOpen
-    if item.isFridayOpen != None:
-        body['isFridayOpen'] = item.isFridayOpen
-    if item.isSaturdayOpen != None:
-        body['isSaturdayOpen'] = item.isSaturdayOpen
-    if item.isSundayOpen != None:
-        body['isSundayOpen'] = item.isSundayOpen
-    
-    resp = await es.update(
+async def item_update(id, body):
+    resp = await es.update(  
         index='items',
-        id=item.itemId,
+        id=id,
         body={
             "doc": body
         }
     )
     return resp
 
+@app.post('/update')
+async def update_index(request: Request):
+    envelope = await request.body()
+    pubsub_message = json.loads(envelope.decode('utf-8'))
+    payload = base64.b64decode(pubsub_message["message"]["data"])
+    json_payload = json.loads(payload)
+    id = json_payload["itemId"]
+    resp = await item_update(id, json_payload)
+    # body = {}
+    # if item.itemId != None:
+    #     body['itemId'] = item.itemId
+    # if item.userId != None:
+    #     body['userId'] = item.userId
+    # if item.images != None:
+    #     body['images'] = item.images
+    # if item.title != None:
+    #     body['title'] = item.title
+    # if item.description != None:
+    #     body['description'] = item.description
+    # if item.price != None:
+    #     body['price'] = item.price
+    # if item.category != None:
+    #     body['categogry'] = item.category
+    # if item.subCategory != None:
+    #     body['subCategory'] = item.subCategory
+    # if item.location != None:
+    #     body['location'] = {
+    #         "lat": item.location["_latitude"],
+    #         "lon": item.location["_longitude"]
+    #     }
+    # if item.locationDescription != None:
+    #     body['locationDescription'] = item.locationDescription
+    # if item.businessName != None: 
+    #     body['businessName'] = item.businessName
+    # if item.businessDescription != None:
+    #     body['businessDescription'] = item.businessDescription
+    # if item.phoneNumber != None:
+    #     body['phoneNumber'] = item.phoneNumber
+    # if item.inStock != None:
+    #     body['inStock'] = item.inStock
+    # if item.mondayOpeningHours != None:
+    #     body['mondayOpeningHours'] = item.mondayOpeningHours
+    # if item.mondayClosingHours != None:
+    #     body['mondayClosingHours'] = item.mondayClosingHours
+    # if item.tuesdayOpeningHours != None:
+    #     body['tuesdayOpeningHours'] = item.tuesdayOpeningHours
+    # if item.tuesdayClosingHours != None:
+    #     body['tuesdayClosingHours'] = item.tuesdayClosingHours
+    # if item.wednesdayOpeningHours != None:
+    #     body['wednesdayOpeningHours'] = item.wednesdayOpeningHours
+    # if item.wednesdayClosingHours != None:
+    #     body['wednesdayClosingHours'] = item.wednesdayClosingHours
+    # if item.thursdayOpeningHours != None:
+    #     body['thursdayOpeningHours'] = item.thursdayOpeningHours
+    # if item.thursdayClosingHours != None:
+    #     body['thursdayClosingHours'] = item.thursdayClosingHours
+    # if item.fridayOpeningHours != None:
+    #     body['fridayOpeningHours'] = item.fridayOpeningHours
+    # if item.fridayClosingHours != None:
+    #     body['fridayClosingHours'] = item.fridayClosingHours
+    # if item.saturdayOpeningHours != None:
+    #     body['saturdayOpeningHours'] = item.saturdayOpeningHours
+    # if item.saturdayClosingHours != None:
+    #     body['saturdayClosingHours'] = item.saturdayClosingHours
+    # if item.sundayOpeningHours != None:
+    #     body['sundayOpeningHours'] = item.sundayOpeningHours
+    # if item.sundayClosingHours != None:
+    #     body['sundayClosingHours'] = item.sundayClosingHours
+    # if item.businessPhotos != None:
+    #     body['businessProfilePhoto'] = item.businessProfilePhoto
+    # if item.isMondayOpen != None:
+    #     body['isMondayOpen'] = item.isMondayOpen
+    # if item.isTuesdayOpen != None:
+    #     body['isTuesdayOpen'] = item.isTuesdayOpen
+    # if item.isWednesdayOpen != None:
+    #     body['isWednesdayOpen'] = item.isWednesdayOpen
+    # if item.isThursdayOpen != None:
+    #     body['isThursdayOpen'] = item.isThursdayOpen
+    # if item.isFridayOpen != None:
+    #     body['isFridayOpen'] = item.isFridayOpen
+    # if item.isSaturdayOpen != None:
+    #     body['isSaturdayOpen'] = item.isSaturdayOpen
+    # if item.isSundayOpen != None:
+    #     body['isSundayOpen'] = item.isSundayOpen
+    
+    # resp = await es.update(
+    #     index='items',
+    #     id=item.itemId,
+    #     body={
+    #         "doc": body
+    #     }
+    # )
+    return resp
+
 class DeleteModel(BaseModel):
     itemId: str
     admin_email: str
 
+async def item_delete(id):
+    resp = await es.delete(
+        index='items',
+        id=id
+    )
+
 @app.post('/delete')
-async def delete_document(item: DeleteModel):
+async def delete_document(request: Request):
     # if item.admin_email == os.environ.get('FIREBASE_AUTH'):
-    if item.admin_email == 'admin@localhost.com':
-        await es.delete(
-            index='items',
-            id=item.itemId
-        )
-    return {'Message': 'Successful Delete'}
+    envelope = await request.body()
+    pubsub_message = json.loads(envelope.decode('utf-8'))
+    payload = base64.b64decode(pubsub_message["message"]["data"])
+    json_payload = json.loads(payload)
+    id = json_payload["itemId"]
+    resp = await item_delete(id)
+    # if item.admin_email == 'admin@localhost.com':
+    #     await es.delete(
+    #         index='items',
+    #         id=item.itemId
+    #     )
+    # return {'Message': 'Successful Delete'}
+    return resp
 
 @app.get('/recommendations')
 async def recommendations(deviceId: str, lat: float, lon: float):
@@ -605,7 +661,7 @@ async def item_viewstream_index(id, body):
     )
     return resp    
 
-@app.post('/merchant-viewstream')
+# @app.post('/merchant-viewstream')
 # async def item
 
 @app.on_event("shutdown")
