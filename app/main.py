@@ -270,7 +270,7 @@ async def search_detail(
                 "fields": [
                     "title^20",
                     "description^15",
-                    "category^5"
+                    "category^5",
                     "subCategory^18"
                 ],
                 "tie_breaker": 0.3
