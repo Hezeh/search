@@ -416,8 +416,8 @@ async def index_es(request: Request):
     payload = base64.b64decode(pubsub_message["message"]["data"])
     json_payload = json.loads(payload)
     id = json_payload["itemId"]
-    latitude = json_payload["_latitude"]
-    longitude = json_payload["_longitude"]
+    latitude = json_payload["location"]["_latitude"]
+    longitude = json_payload["location"]["_longitude"]
     json_payload["location"] = {
         "lat": latitude,
         "lon": longitude
