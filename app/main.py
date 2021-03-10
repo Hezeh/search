@@ -433,8 +433,7 @@ async def recs(lat: Optional[float] = None, lon: Optional[float] = None):
                         {
                             "terms": {
                                 "subCategory.keyword": [
-                                    "Snacks",
-                                    "Skateboards and Skates"
+                                    "Snacks"
                                 ]
                             }
                         },
