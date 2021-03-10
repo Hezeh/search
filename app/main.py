@@ -457,16 +457,25 @@ async def recs(lat: Optional[float] = None, lon: Optional[float] = None):
         },
     )
     docs = resp["hits"]["hits"]
-    recs = defaultdict(list)
+    recs_list = []
     buckets = resp["aggregations"]["categories"]["buckets"]
     for bucket in buckets:
         category = bucket["key"]
+        # recs = defaultdict(list)
+        recs = []
         if len(docs) != 0:
             for doc in docs:
                 doc_category = doc["_source"]["category"]
                 if doc_category == category:
-                    recs[f"{category}"].append(doc["_source"])
-    return recs
+                    # recs[f"{category}"].append(doc["_source"])
+                    recs.append(doc["_source"])
+        recs_list.append({
+            "category": f"{category}",
+            "items": recs
+        })
+    return {
+        "recommendations": recs_list
+    }
 
 
 @app.post("/item-viewstream", status_code=200)
