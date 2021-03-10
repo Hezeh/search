@@ -422,7 +422,7 @@ async def delete_document(request: Request):
 
 
 @app.get("/recommendations")
-async def recommendations(lat: float, lon: float):
+async def recommendations(lat: Optional[float], lon: Optional[float]):
     # if lat & lon aren't provided 
     recs = await recsys.recommendations()
     return recs
