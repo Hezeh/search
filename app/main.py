@@ -429,7 +429,8 @@ async def recs(lat: Optional[float] = None, lon: Optional[float] = None):
             "query": {
                 "bool": {
                     "should": [
-                        {"terms": {"category.keyword": ["Food", "Home and Kitchen"]}},
+                        {"terms": {"category.keyword": ["Food"], "boost": 1.0}},
+                        {"terms": {"category.keyword": ["Home and Kitchen"], "boost": 10.0}},
                         {"terms": {"subCategory.keyword": ["Snacks"]}},
                     ]
                 }
