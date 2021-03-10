@@ -465,7 +465,7 @@ async def recs(lat: Optional[float] = None, lon: Optional[float] = None):
             for doc in docs:
                 doc_category = doc["_source"]["category"]
                 if doc_category == category:
-                    recs[f"{category}"].append(doc)
+                    recs[f"{category}"].append(doc["_source"])
     return recs
 
 
