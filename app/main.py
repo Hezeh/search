@@ -422,7 +422,7 @@ async def delete_document(request: Request):
 
 
 @app.get("/recs")
-async def recs(lat: Optional[float], lon: Optional[float]):
+async def recs(lat: Optional[float] = None, lon: Optional[float] = None):
     resp = await es.search(
         index="items",
         body={
