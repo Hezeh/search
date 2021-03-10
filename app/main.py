@@ -316,16 +316,20 @@ async def search_detail(
         },
         size=20,
         )
-        for result in results['hits']['hits']:
-            source = result['_source']
-            sort = result['sort'][0]
-            source['distance'] = sort
-            parsed_results.append(source)
-        bounds = results['aggregations']['map_zoom']['bounds']
-        return {
-            'items': parsed_results,
-            'bounds': bounds,
-        }
+        hits = results['hits']['hits']
+        if len(hits) != 0:
+            for result in hits:
+                source = result['_source']
+                sort = result['sort'][0]
+                source['distance'] = sort
+                parsed_results.append(source)
+            bounds = results['aggregations']['map_zoom']['bounds']
+            return {
+                'items': parsed_results,
+                'bounds': bounds,
+            }
+        else:
+            return {}
     else:
         # TODO: fetch the key fron env variables in production
         # key = os.environ.get('IP_GEOLOCATION_KEY')
