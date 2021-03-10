@@ -251,9 +251,9 @@ async def search_detail(
                                     "title^20",
                                     "description^15",
                                     "category^5",
-                                    "subCategory^18",
+                                    "subCategory^18"
                                 ],
-                                "tie_breaker": 0.3,
+                                "tie_breaker": 0.3
                             }
                         },
                         "functions": [
@@ -263,7 +263,7 @@ async def search_detail(
                                     "location": {
                                         "origin": {"lat": lat, "lon": lon},
                                         "offset": "0km",
-                                        "scale": "4km",
+                                        "scale": "4km"
                                     }
                                 },
                             }
@@ -276,7 +276,7 @@ async def search_detail(
                             "location": {"lat": lat, "lon": lon},
                             "order": "asc",
                             "unit": "km",
-                            "ignore_unmapped": True,
+                            "ignore_unmapped": True
                         }
                     }
                 ],
@@ -294,7 +294,7 @@ async def search_detail(
             bounds = results["aggregations"]["map_zoom"]["bounds"]
             return {
                 "items": parsed_results,
-                "bounds": bounds,
+                "bounds": bounds
             }
         else:
             return {}
@@ -319,7 +319,7 @@ async def search_detail(
                             "multi_match": {
                                 "query": q,
                                 "fields": ["title^10", "description"],
-                                "tie_breaker": 0.3,
+                                "tie_breaker": 0.3
                             }
                         },
                         "functions": [
@@ -329,7 +329,7 @@ async def search_detail(
                                     "location": {
                                         "origin": {"lat": latitude, "lon": longitude},
                                         "offset": "0km",
-                                        "scale": "4km",
+                                        "scale": "4km"
                                     }
                                 },
                             }
@@ -342,7 +342,7 @@ async def search_detail(
                             "location": {"lat": lat, "lon": longitude},
                             "order": "asc",
                             "unit": "km",
-                            "ignore_unmapped": True,
+                            "ignore_unmapped": True
                         }
                     }
                 ],
@@ -429,14 +429,8 @@ async def recs(lat: Optional[float] = None, lon: Optional[float] = None):
             "query": {
                 "bool": {
                     "should": [
-                        {"terms": {"category.keyword": ["Food"]}},
-                        {
-                            "terms": {
-                                "subCategory.keyword": [
-                                    "Snacks"
-                                ]
-                            }
-                        },
+                        {"terms": {"category.keyword": ["Food", "Home and Kitchen"]}},
+                        {"terms": {"subCategory.keyword": ["Snacks"]}},
                     ]
                 }
             },
@@ -469,13 +463,8 @@ async def recs(lat: Optional[float] = None, lon: Optional[float] = None):
                 if doc_category == category:
                     # recs[f"{category}"].append(doc["_source"])
                     recs.append(doc["_source"])
-        recs_list.append({
-            "category": f"{category}",
-            "items": recs
-        })
-    return {
-        "recommendations": recs_list
-    }
+        recs_list.append({"category": f"{category}", "items": recs})
+    return {"recommendations": recs_list}
 
 
 @app.post("/item-viewstream", status_code=200)
