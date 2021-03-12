@@ -237,6 +237,30 @@ async def item_viewstream_index(id, body):
     resp = await es.index(index="item-viewstream", id=id, body=body)
     return resp
 
+
+@app.get('category/{category_name}')
+async def category_items(category_name: str, lat: Optional[float] = None, lon: Optional[float] = None):
+    parsed_results = []
+    resp = es.search(  
+        index='items',
+        body={
+            "query": {
+                "match": {
+                    "category.keyword": category_name
+                }
+            }
+        }
+    )
+    hits = resp["hits"]["hits"]
+    if len(hits) != 0:
+        for result in hits:
+            source = result["_source"]
+            parsed_results.append(source)
+    return {
+        'items': parsed_results
+    }
+
+
 @app.on_event("shutdown")
 async def app_shutdown():
     await es.close()
