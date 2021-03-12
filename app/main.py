@@ -431,13 +431,29 @@ async def recs(lat: Optional[float] = None, lon: Optional[float] = None):
                     "should": [
                         {"terms": {"category.keyword": ["Food"], "boost": 1.0}},
                         {"terms": {"category.keyword": ["Home and Kitchen"], "boost": 10.0}},
-                        {"terms": {"subCategory.keyword": ["Snacks"]}},
+                        {"terms": {"category.keyword": ["Arts and Craft"], "boost": 1.0}},
+                        {"terms": {"category.keyword": ["Automotive"], "boost": 1.0}},
+                        {"terms": {"category.keyword": ["Baby"], "boost": 1.0}},
+                        {"terms": {"category.keyword": ["Beauty and Personal Care"], "boost": 1.0}},
+                        {"terms": {"category.keyword": ["Computers"], "boost": 1.0}},
+                        {"terms": {"category.keyword": ["Electronics"], "boost": 1.0}},
+                        {"terms": {"category.keyword": ["Household Essentials"], "boost": 1.0}},
+                        {"terms": {"category.keyword": ["Industrial and Scientific"], "boost": 1.0}},
+                        {"terms": {"category.keyword": ["Luggage"], "boost": 1.0}},
+                        {"terms": {"category.keyword": ["Men's Fashion"], "boost": 1.0}},
+                        {"terms": {"category.keyword": ["Patio and Garden"], "boost": 1.0}},
+                        {"terms": {"category.keyword": ["Pet Supplies"], "boost": 1.0}},
+                        {"terms": {"category.keyword": ["Smart Home"], "boost": 1.0}},
+                        {"terms": {"category.keyword": ["Sports, Fitness and Outdoors"], "boost": 1.0}},
+                        {"terms": {"category.keyword": ["Tools and Home Improvement"], "boost": 1.0}},
+                        {"terms": {"category.keyword": ["Toys and Games"], "boost": 1.0}},
+                        {"terms": {"category.keyword": ["Women's Fashion"], "boost": 1.0}}
                     ]
                 }
             },
             "aggs": {
                 "categories": {
-                    "terms": {"field": "category.keyword", "size": 10},
+                    "terms": {"field": "category.keyword", "size": 20},
                     "aggs": {
                         "sub_categories": {
                             "terms": {
