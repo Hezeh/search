@@ -238,7 +238,7 @@ async def item_viewstream_index(id, body):
     return resp
 
 
-@app.get('category/{category_name}')
+@app.get('/category/{category_name}')
 async def category_items(category_name: str, lat: Optional[float] = None, lon: Optional[float] = None):
     parsed_results = []
     resp = es.search(  
