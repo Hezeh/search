@@ -261,6 +261,28 @@ async def category_items(category_name: str, lat: Optional[float] = None, lon: O
     }
 
 
+@app.get('/merchant/{merchant_id}')
+async def merchant_items(merchant_id: str):
+    parsed_results = []
+    resp = await es.search(  
+        index='items',
+        body={
+            "query": {
+                "match": {
+                    "userId.keyword": merchant_id
+                }
+            }
+        }
+    )
+    hits = resp["hits"]["hits"]
+    if len(hits) != 0:
+        for result in hits:
+            source = result["_source"]
+            parsed_results.append(source)
+    return {
+        'items': parsed_results
+    }
+
 @app.on_event("shutdown")
 async def app_shutdown():
     await es.close()
