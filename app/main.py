@@ -55,7 +55,8 @@ async def search_detail(
                                     "category^5",
                                     "subCategory^18"
                                 ],
-                                "tie_breaker": 0.3
+                                "tie_breaker": 0.3,
+                                "fuzziness": "AUTO"
                             }
                         },
                         "functions": [
