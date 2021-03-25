@@ -7,6 +7,7 @@ import requests
 from pydantic import BaseModel
 import json
 import base64
+import uuid
 
 app = FastAPI()
 es = AsyncElasticsearch()
@@ -30,7 +31,8 @@ async def search_detail(
 ):
     parsed_results = []
     latitude = lat
-    longitude = lon  
+    longitude = lon
+    searchId = uuid.uuid4()  
     if latitude == None and longitude == None:
         key = "a390f3d3aa104eb0b008f3ff8982c055"
         r = requests.get(
@@ -97,7 +99,8 @@ async def search_detail(
         bounds = results["aggregations"]["map_zoom"]["bounds"]
         return {
             "items": parsed_results,
-            "bounds": bounds
+            "bounds": bounds,
+            "searchId": searchId
         }
     else:
         return {}
