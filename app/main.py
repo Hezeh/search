@@ -163,6 +163,7 @@ async def delete_document(request: Request):
 async def recs(lat: Optional[float] = None, lon: Optional[float] = None, x_forwarded_for: Optional[str] = Header(None),):
     latitude = lat
     longitude = lon
+    recsId = uuid.uuid4() 
     if latitude == None and longitude == None:
         key = "a390f3d3aa104eb0b008f3ff8982c055"
         r = requests.get(
@@ -237,7 +238,10 @@ async def recs(lat: Optional[float] = None, lon: Optional[float] = None, x_forwa
                 if doc_category == category:
                     recs.append(doc["_source"])
         recs_list.append({"category": f"{category}", "items": recs})
-    return {"recommendations": recs_list}
+    return {
+        "recsId": recsId,
+        "recommendations": recs_list
+    }
 
 
 @app.post("/item-viewstream", status_code=200)
