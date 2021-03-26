@@ -200,7 +200,10 @@ async def recs(lat: Optional[float] = None, lon: Optional[float] = None, x_forwa
                             "distance_feature": {
                                 "field": "location",
                                 "pivot": "1000m",
-                                "origin": [latitude, longitude]
+                                "origin": {
+                                    "lat": latitude,
+                                    "lon": longitude
+                                }
                             }
                         }
                     ]
