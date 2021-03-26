@@ -160,7 +160,17 @@ async def delete_document(request: Request):
 
 
 @app.get("/recs")
-async def recs(lat: Optional[float] = None, lon: Optional[float] = None):
+async def recs(lat: Optional[float] = None, lon: Optional[float] = None, x_forwarded_for: Optional[str] = Header(None),):
+    latitude = lat
+    longitude = lon
+    if latitude == None and longitude == None:
+        key = "a390f3d3aa104eb0b008f3ff8982c055"
+        r = requests.get(
+            f"https://api.ipgeolocation.io/ipgeo?apiKey={key}&ip={x_forwarded_for}"
+        )
+        ip_response = r.json()
+        latitude = ip_response["latitude"]
+        longitude = ip_response["longitude"]
     resp = await es.search(
         index="items",
         body={
@@ -185,7 +195,14 @@ async def recs(lat: Optional[float] = None, lon: Optional[float] = None):
                         {"terms": {"category.keyword": ["Sports, Fitness and Outdoors"], "boost": 1.0}},
                         {"terms": {"category.keyword": ["Tools and Home Improvement"], "boost": 1.0}},
                         {"terms": {"category.keyword": ["Toys and Games"], "boost": 1.0}},
-                        {"terms": {"category.keyword": ["Women's Fashion"], "boost": 1.0}}
+                        {"terms": {"category.keyword": ["Women's Fashion"], "boost": 1.0}},
+                        {
+                            "distance_feature": {
+                                "field": "location",
+                                "pivot": "1000m",
+                                "origin": [latitude, longitude]
+                            }
+                        }
                     ]
                 }
             },
