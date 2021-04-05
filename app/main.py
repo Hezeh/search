@@ -55,13 +55,42 @@ async def search_detail(
                                     "title^20",
                                     "description^15",
                                     "category^5",
-                                    "subCategory^18"
+                                    "subCategory^18",
+                                    "businessName^5",
+                                    "locationDescription^10",
+                                    "businessDescription^5"
                                 ],
                                 "tie_breaker": 0.3,
                                 "fuzziness": "AUTO"
                             }
                         },
                         "functions": [
+                            {
+                                "weight": 1.2,
+                                "filter": {
+                                    "bool": {
+                                        "should": [
+                                            {
+                                                "term": {
+                                                    "has_discount": True
+                                                },
+                                                "term": {
+                                                    "promoted": True
+                                                },
+                                                "term": {
+                                                    "engaged": True
+                                                },
+                                                "term": {
+                                                    "inStock": True
+                                                }
+                                            }
+                                        ]
+                                    }
+                                },
+                                "script_score": {
+                                    "script": "0.3*doc['has_discount'].value + 0.5*doc['promoted'].value + 0.2*doc['engaged'].value + 0.5*doc['inStock'].value"
+                                }
+                            },
                             {
                                 "weight": 2.1,
                                 "gauss": {
