@@ -101,9 +101,9 @@ async def search_detail(
                                         "offset": "0km",
                                         "scale": "4km"
                                     }
-                                },
+                                }
                             }
-                        ],
+                        ]
                     }
                 },
                 "sort": [
@@ -116,9 +116,9 @@ async def search_detail(
                         }
                     }
                 ],
-                "aggs": {"map_zoom": {"geo_bounds": {"field": "location"}}},
+                "aggs": {"map_zoom": {"geo_bounds": {"field": "location"}}}
             },
-            size=20,
+            size=20
         )
     hits = results["hits"]["hits"]
     if len(hits) != 0:
