@@ -66,29 +66,31 @@ async def search_detail(
                         },
                         "functions": [
                             {
+                                "weight": 4,
+                                "filter": {
+                                    "bool": {
+                                        "should": [
+                                            {
+                                                "term": {
+                                                    "promoted": True
+                                                }
+                                            }
+                                        ]
+                                    }
+                                }
+                                },
+                                {
                                 "weight": 1.2,
                                 "filter": {
                                     "bool": {
                                         "should": [
                                             {
                                                 "term": {
-                                                    "has_discount": True
-                                                },
-                                                "term": {
-                                                    "promoted": True
-                                                },
-                                                "term": {
-                                                    "engaged": True
-                                                },
-                                                "term": {
                                                     "inStock": True
                                                 }
                                             }
                                         ]
                                     }
-                                },
-                                "script_score": {
-                                    "script": "0.3*doc['has_discount'].value + 0.5*doc['promoted'].value + 0.2*doc['engaged'].value + 0.5*doc['inStock'].value"
                                 }
                             },
                             {
