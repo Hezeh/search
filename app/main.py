@@ -317,6 +317,12 @@ async def serp_clickstream(request: Request, response: Response):
     searchId = json_payload["searchId"]
     itemId = json_payload["itemId"]
     merchantId = json_payload["merchantId"]
+    lat = json_payload["lat"]
+    lon = json_payload["lon"]
+    json_payload["location"] = {
+        "lat": lat,
+        "lon": lon,
+    }
     await indexing_func("all-clicks", searchId, json_payload)
     await indexing_func("item-clickstream", itemId, json_payload)
     await indexing_func("merchant-items-clickstream", merchantId, json_payload)
@@ -338,6 +344,12 @@ async def serp_clickstream(request: Request, response: Response):
     payload = base64.b64decode(pubsub_message["message"]["data"])
     json_payload = json.loads(payload)
     merchantId = json_payload["merchantId"]
+    lat = json_payload["lat"]
+    lon = json_payload["lon"]
+    json_payload["location"] = {
+        "lat": lat,
+        "lon": lon,
+    }
     await indexing_func("merchant-profile-clickstream", merchantId, json_payload)
     return {"Message": "Done Indexing"}
 
