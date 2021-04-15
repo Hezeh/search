@@ -297,6 +297,36 @@ async def item_viewstream_index(id, body):
     return resp
 
 
+@app.post('serp-clickstream', status_code=200)
+async def serp_clickstream(request: Request, response: Response):
+    envelope = await request.body()
+    if not envelope:
+        msg = "no Pub/Sub message received"
+        response.status_code = status.HTTP_400_BAD_REQUEST
+        return f"Bad Request: {msg}"
+
+    pubsub_message = json.loads(envelope.decode("utf-8"))
+    payload = base64.b64decode(pubsub_message["message"]["data"])
+    json_payload = json.loads(payload)
+    # Index every searchId 
+    # Get the query
+    # Add a click to all clicks index
+    # Add a click to the item-clickstream index
+    # Add a click to the merchant-items-clickstream index
+    # TODO Add a click to the user-clickstream-category index
+    searchId = json_payload["searchId"]
+    itemId = json_payload["itemId"]
+    merchantId = json_payload["merchantId"]
+    await indexing_func("all-clicks", searchId, json_payload)
+    await indexing_func("item-clickstream", itemId, json_payload)
+    await indexing_func("merchant-items-clickstream", merchantId, json_payload)
+    return {"Message": "Done Indexing"}
+
+async def indexing_func(index, id, body):
+    resp = await es.index(index=index, id=id, body=body)
+    return resp
+
+
 @app.get('/category/{category_name}')
 async def category_items(category_name: str, lat: Optional[float] = None, lon: Optional[float] = None):
     parsed_results = []
