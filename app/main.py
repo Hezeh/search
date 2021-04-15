@@ -335,7 +335,7 @@ async def indexing_func(index, id, body):
     return resp
 
 @app.post('profile-clickstream', status_code=200)
-async def serp_clickstream(request: Request, response: Response):
+async def profile_clickstream(request: Request, response: Response):
     envelope = await request.body()
     if not envelope:
         msg = "no Pub/Sub message received"
@@ -356,7 +356,7 @@ async def serp_clickstream(request: Request, response: Response):
     return {"Message": "Done Indexing"}
 
 @app.post('recs-clickstream', status_code=200)
-async def serp_clickstream(request: Request, response: Response):
+async def recs_clickstream(request: Request, response: Response):
     envelope = await request.body()
     if not envelope:
         msg = "no Pub/Sub message received"
