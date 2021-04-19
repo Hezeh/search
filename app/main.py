@@ -288,6 +288,12 @@ async def item_viewstream(request: Request, response: Response):
     payload = base64.b64decode(pubsub_message["message"]["data"])
     json_payload = json.loads(payload)
     viewId = json_payload["viewId"]
+    lat = json_payload["lat"]
+    lon = json_payload["lon"]
+    json_payload["location"] = {
+        "lat": lat,
+        "lon": lon,
+    }
     resp = await item_viewstream_index(viewId, json_payload)
     return resp
 
