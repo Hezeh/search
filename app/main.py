@@ -506,6 +506,99 @@ async def merchant_items(merchant_id: str):
         'items': parsed_results
     }
 
+@app.get('/analytics/{merchant_id}')
+async def merchant_impressions_analytics(merchant_id: str):
+    search_page_impressions = ""
+    recs_page_impressions = ""
+    category_page_impressions = ""
+    total_impressions = ""
+    resp = await es.search(  
+        index='item-viewstream',
+        body={
+            "_source": False,
+            "aggs": {
+                "AllPages": {
+                "filter": {
+                    "bool": {
+                    "must": [
+                        {
+                            "match": {
+                                "merchantId": merchant_id
+                            }
+                        }
+                    ]
+                    }
+                }
+                },
+                "RecommendationsPage": {
+                "filter": {
+                    "bool": {
+                    "must": [
+                        {
+                            "match": {
+                                "merchantId": merchant_id
+                            }
+                        },
+                        {
+                            "match": {
+                                "type.keyword": "Recommendations"
+                            }
+                        }
+                    ]
+                    }
+                }
+                },
+                "SearchPage": {
+                "filter": {
+                    "bool": {
+                    "must": [
+                        {
+                            "match": {
+                                "merchantId": merchant_id
+                            }
+                        },
+                        {
+                            "match": {
+                                "type.keyword": "Search"
+                            }
+                        }
+                    ]
+                    }
+                }
+                },
+                "CategoryPage": {
+                "filter": {
+                    "bool": {
+                    "must": [
+                        {
+                            "match": {
+                                "merchantId": merchant_id
+                            }
+                        },
+                        {
+                            "match": {
+                                "type.keyword": "CategoryViewAll"
+                            }
+                        }
+                    ]
+                    }
+                }
+                }
+            }
+            }
+    )
+    aggs = resp["aggregations"]
+    search_page_impressions = aggs["SearchPage"]["doc_count"]
+    recs_page_impressions = aggs["RecommendationsPage"]["doc_count"]
+    category_page_impressions = aggs["CategoryPage"]["doc_count"]
+    total_impressions = aggs["AllPages"]["doc_count"]
+    return {
+        "searchImpressions": search_page_impressions,
+        "recommendationsImpressions": recs_page_impressions,
+        "categoryImpressions": category_page_impressions,
+        "totalImpressions": total_impressions
+    }
+
 @app.on_event("shutdown")
 async def app_shutdown():
     await es.close()
