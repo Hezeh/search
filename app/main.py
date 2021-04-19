@@ -278,6 +278,8 @@ async def recs(lat: Optional[float] = None, lon: Optional[float] = None, x_forwa
 @app.post("/item-viewstream", status_code=200)
 async def item_viewstream(request: Request, response: Response):
     envelope = await request.body()
+    lat = None
+    lon = None
     if not envelope:
         msg = "no Pub/Sub message received"
         print(f"error: {msg}")
@@ -288,12 +290,14 @@ async def item_viewstream(request: Request, response: Response):
     payload = base64.b64decode(pubsub_message["message"]["data"])
     json_payload = json.loads(payload)
     viewId = json_payload["viewId"]
-    lat = json_payload["lat"]
-    lon = json_payload["lon"]
-    json_payload["location"] = {
-        "lat": lat,
-        "lon": lon,
-    }
+    if "lat" in json_payload & "lon" in json_payload:
+        lat = json_payload["lat"]
+        lon = json_payload["lon"]
+    if lat != None & lon != None:
+        json_payload["location"] = {
+            "lat": lat,
+            "lon": lon,
+        }
     resp = await item_viewstream_index(viewId, json_payload)
     return resp
 
