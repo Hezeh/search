@@ -297,7 +297,7 @@ async def item_viewstream_index(id, body):
     return resp
 
 
-@app.post('serp-clickstream', status_code=200)
+@app.post('/serp-clickstream', status_code=200)
 async def serp_clickstream(request: Request, response: Response):
     envelope = await request.body()
     if not envelope:
@@ -334,7 +334,7 @@ async def indexing_func(index, id, body):
     resp = await es.index(index=index, id=id, body=body)
     return resp
 
-@app.post('profile-clickstream', status_code=200)
+@app.post('/profile-clickstream', status_code=200)
 async def profile_clickstream(request: Request, response: Response):
     envelope = await request.body()
     if not envelope:
@@ -355,7 +355,7 @@ async def profile_clickstream(request: Request, response: Response):
     await indexing_func("merchant-profile-clickstream", merchantId, json_payload)
     return {"Message": "Done Indexing"}
 
-@app.post('recs-clickstream', status_code=200)
+@app.post('/recs-clickstream', status_code=200)
 async def recs_clickstream(request: Request, response: Response):
     envelope = await request.body()
     if not envelope:
@@ -382,7 +382,7 @@ async def recs_clickstream(request: Request, response: Response):
     await indexing_func("merchant-items-clickstream", merchantId, json_payload)
     return {"Message": "Done Indexing"}
 
-@app.post('category-item-clickstream', status_code=200)
+@app.post('/category-item-clickstream', status_code=200)
 async def category_item_clickstream(request: Request, response: Response):
     envelope = await request.body()
     if not envelope:
@@ -407,7 +407,7 @@ async def category_item_clickstream(request: Request, response: Response):
     await indexing_func("merchant-items-clickstream", merchantId, json_payload)
     return {"Message": "Done Indexing"}
 
-@app.post('category-all-clickstream', status_code=200)
+@app.post('/category-all-clickstream', status_code=200)
 async def category_all_clickstream(request: Request, response: Response):
     envelope = await request.body()
     if not envelope:
@@ -426,6 +426,33 @@ async def category_all_clickstream(request: Request, response: Response):
         "lon": lon,
     }
     await indexing_func("category-all-clickstream", eventId, json_payload)
+    return {"Message": "Done Indexing"}
+
+@app.post('/profile-item-clickstream', status_code=200)
+async def profile_item_clickstream(request: Request, response: Response):
+    envelope = await request.body()
+    if not envelope:
+        msg = "no Pub/Sub message received"
+        response.status_code = status.HTTP_400_BAD_REQUEST
+        return f"Bad Request: {msg}"
+
+    pubsub_message = json.loads(envelope.decode("utf-8"))
+    payload = base64.b64decode(pubsub_message["message"]["data"])
+    json_payload = json.loads(payload)
+    searchId = json_payload["searchId"]
+    eventId = json_payload['eventId']
+    itemId = json_payload["itemId"]
+    merchantId = json_payload["merchantId"]
+    lat = json_payload["lat"]
+    lon = json_payload["lon"]
+    json_payload["location"] = {
+        "lat": lat,
+        "lon": lon,
+    }
+    await indexing_func("all-items-clicks", eventId, json_payload)
+    await indexing_func("profile-item-clicks", searchId, json_payload)
+    await indexing_func("item-clickstream", itemId, json_payload)
+    await indexing_func("merchant-items-clickstream", merchantId, json_payload)
     return {"Message": "Done Indexing"}
 
 @app.get('/category/{category_name}')
