@@ -294,7 +294,7 @@ async def item_viewstream(request: Request, response: Response):
         lat = json_payload["lat"] 
     if "lon" in json_payload:
         lon = json_payload["lon"]
-    if lat != None & lon != None:
+    if lat != None and lon != None:
         json_payload["location"] = {
             "lat": lat,
             "lon": lon,
