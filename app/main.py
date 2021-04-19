@@ -506,7 +506,7 @@ async def merchant_items(merchant_id: str):
         'items': parsed_results
     }
 
-@app.get('/analytics/{merchant_id}')
+@app.get('/impressions/analytics/{merchant_id}')
 async def merchant_impressions_analytics(merchant_id: str):
     search_page_impressions = ""
     recs_page_impressions = ""
