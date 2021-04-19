@@ -290,8 +290,9 @@ async def item_viewstream(request: Request, response: Response):
     payload = base64.b64decode(pubsub_message["message"]["data"])
     json_payload = json.loads(payload)
     viewId = json_payload["viewId"]
-    if "lat" in json_payload & "lon" in json_payload:
-        lat = json_payload["lat"]
+    if "lat" in json_payload:
+        lat = json_payload["lat"] 
+    if "lon" in json_payload:
         lon = json_payload["lon"]
     if lat != None & lon != None:
         json_payload["location"] = {
