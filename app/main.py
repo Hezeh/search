@@ -260,6 +260,8 @@ async def recs(lat: Optional[float] = None, lon: Optional[float] = None, x_forwa
     docs = resp["hits"]["hits"]
     recs_list = []
     buckets = resp["aggregations"]["categories"]["buckets"]
+    # Get all 10 recently clicked categories
+    # Get all 10 recently clicked items
     for bucket in buckets:
         category = bucket["key"]
         recs = []
@@ -308,7 +310,7 @@ async def item_viewstream_index(id, body):
     return resp
 
 
-@app.post('/serp-clickstream', status_code=200)
+@app.post('/clickstream', status_code=200)
 async def serp_clickstream(request: Request, response: Response):
     envelope = await request.body()
     if not envelope:
@@ -319,152 +321,23 @@ async def serp_clickstream(request: Request, response: Response):
     pubsub_message = json.loads(envelope.decode("utf-8"))
     payload = base64.b64decode(pubsub_message["message"]["data"])
     json_payload = json.loads(payload)
-    # Index every searchId 
-    # Get the query
-    # Add a click to all clicks index
-    # Add a click to the item-clickstream index
-    # Add a click to the merchant-items-clickstream index
-    # TODO Add a click to the user-clickstream-category index
-    searchId = json_payload["searchId"]
     eventId = json_payload['eventId']
-    itemId = json_payload["itemId"]
-    merchantId = json_payload["merchantId"]
-    lat = json_payload["lat"]
-    lon = json_payload["lon"]
-    json_payload["location"] = {
-        "lat": lat,
-        "lon": lon,
-    }
-    await indexing_func("all-items-clicks", eventId, json_payload)
-    await indexing_func("search-clicks", searchId, json_payload)
-    await indexing_func("item-clickstream", itemId, json_payload)
-    await indexing_func("merchant-items-clickstream", merchantId, json_payload)
-    return {"Message": "Done Indexing"}
+    if "lat" in json_payload:
+        lat = json_payload["lat"] 
+    if "lon" in json_payload:
+        lon = json_payload["lon"]
+    if lat != None and lon != None:
+        json_payload["location"] = {
+            "lat": lat,
+            "lon": lon,
+        }
+    await indexing_func("clickstream", eventId, json_payload)
+    return {}
 
 async def indexing_func(index, id, body):
     resp = await es.index(index=index, id=id, body=body)
     return resp
 
-@app.post('/profile-clickstream', status_code=200)
-async def profile_clickstream(request: Request, response: Response):
-    envelope = await request.body()
-    if not envelope:
-        msg = "no Pub/Sub message received"
-        response.status_code = status.HTTP_400_BAD_REQUEST
-        return f"Bad Request: {msg}"
-
-    pubsub_message = json.loads(envelope.decode("utf-8"))
-    payload = base64.b64decode(pubsub_message["message"]["data"])
-    json_payload = json.loads(payload)
-    merchantId = json_payload["merchantId"]
-    lat = json_payload["lat"]
-    lon = json_payload["lon"]
-    json_payload["location"] = {
-        "lat": lat,
-        "lon": lon,
-    }
-    await indexing_func("merchant-profile-clickstream", merchantId, json_payload)
-    return {"Message": "Done Indexing"}
-
-@app.post('/recs-clickstream', status_code=200)
-async def recs_clickstream(request: Request, response: Response):
-    envelope = await request.body()
-    if not envelope:
-        msg = "no Pub/Sub message received"
-        response.status_code = status.HTTP_400_BAD_REQUEST
-        return f"Bad Request: {msg}"
-
-    pubsub_message = json.loads(envelope.decode("utf-8"))
-    payload = base64.b64decode(pubsub_message["message"]["data"])
-    json_payload = json.loads(payload)
-    merchantId = json_payload["merchantId"]
-    recsId = json_payload["recsId"]
-    lat = json_payload["lat"]
-    lon = json_payload["lon"]
-    json_payload["location"] = {
-        "lat": lat,
-        "lon": lon,
-    }
-    eventId = json_payload['eventId']
-    itemId = json_payload["itemId"]
-    await indexing_func("all-items-clicks", eventId, json_payload)
-    await indexing_func("item-clickstream", itemId, json_payload)
-    await indexing_func("recs-clicks", recsId, json_payload)
-    await indexing_func("merchant-items-clickstream", merchantId, json_payload)
-    return {"Message": "Done Indexing"}
-
-@app.post('/category-item-clickstream', status_code=200)
-async def category_item_clickstream(request: Request, response: Response):
-    envelope = await request.body()
-    if not envelope:
-        msg = "no Pub/Sub message received"
-        response.status_code = status.HTTP_400_BAD_REQUEST
-        return f"Bad Request: {msg}"
-
-    pubsub_message = json.loads(envelope.decode("utf-8"))
-    payload = base64.b64decode(pubsub_message["message"]["data"])
-    json_payload = json.loads(payload)
-    merchantId = json_payload["merchantId"]
-    eventId = json_payload["eventId"]
-    itemId = json_payload["itemId"]
-    lat = json_payload["lat"]
-    lon = json_payload["lon"]
-    json_payload["location"] = {
-        "lat": lat,
-        "lon": lon,
-    }
-    await indexing_func("all-items-clicks", eventId, json_payload)
-    await indexing_func("item-clickstream", itemId, json_payload)
-    await indexing_func("merchant-items-clickstream", merchantId, json_payload)
-    return {"Message": "Done Indexing"}
-
-@app.post('/category-all-clickstream', status_code=200)
-async def category_all_clickstream(request: Request, response: Response):
-    envelope = await request.body()
-    if not envelope:
-        msg = "no Pub/Sub message received"
-        response.status_code = status.HTTP_400_BAD_REQUEST
-        return f"Bad Request: {msg}"
-
-    pubsub_message = json.loads(envelope.decode("utf-8"))
-    payload = base64.b64decode(pubsub_message["message"]["data"])
-    json_payload = json.loads(payload)
-    eventId = json_payload["event"]
-    lat = json_payload["lat"]
-    lon = json_payload["lon"]
-    json_payload["location"] = {
-        "lat": lat,
-        "lon": lon,
-    }
-    await indexing_func("category-all-clickstream", eventId, json_payload)
-    return {"Message": "Done Indexing"}
-
-@app.post('/profile-item-clickstream', status_code=200)
-async def profile_item_clickstream(request: Request, response: Response):
-    envelope = await request.body()
-    if not envelope:
-        msg = "no Pub/Sub message received"
-        response.status_code = status.HTTP_400_BAD_REQUEST
-        return f"Bad Request: {msg}"
-
-    pubsub_message = json.loads(envelope.decode("utf-8"))
-    payload = base64.b64decode(pubsub_message["message"]["data"])
-    json_payload = json.loads(payload)
-    searchId = json_payload["searchId"]
-    eventId = json_payload['eventId']
-    itemId = json_payload["itemId"]
-    merchantId = json_payload["merchantId"]
-    lat = json_payload["lat"]
-    lon = json_payload["lon"]
-    json_payload["location"] = {
-        "lat": lat,
-        "lon": lon,
-    }
-    await indexing_func("all-items-clicks", eventId, json_payload)
-    await indexing_func("profile-item-clicks", searchId, json_payload)
-    await indexing_func("item-clickstream", itemId, json_payload)
-    await indexing_func("merchant-items-clickstream", merchantId, json_payload)
-    return {"Message": "Done Indexing"}
 
 @app.get('/category/{category_name}')
 async def category_items(category_name: str, lat: Optional[float] = None, lon: Optional[float] = None):
