@@ -461,6 +461,24 @@ async def merchant_impressions_analytics(merchant_id: str):
                     ]
                     }
                 }
+                },
+                "ProfilePage": {
+                "filter": {
+                    "bool": {
+                    "must": [
+                        {
+                            "match": {
+                                "merchantId": merchant_id
+                            }
+                        },
+                        {
+                            "match": {
+                                "type.keyword": "MerchantProfileItems"
+                            }
+                        }
+                    ]
+                    }
+                }
                 }
             }
             }
@@ -470,11 +488,240 @@ async def merchant_impressions_analytics(merchant_id: str):
     recs_page_impressions = aggs["RecommendationsPage"]["doc_count"]
     category_page_impressions = aggs["CategoryPage"]["doc_count"]
     total_impressions = aggs["AllPages"]["doc_count"]
+    profile_page_impresssions = aggs["ProfilePage"]["doc_count"]
     return {
         "searchImpressions": search_page_impressions,
         "recommendationsImpressions": recs_page_impressions,
         "categoryImpressions": category_page_impressions,
-        "totalImpressions": total_impressions
+        "totalImpressions": total_impressions,
+        "profilePageImpressions": profile_page_impresssions
+    }
+
+@app.get('item/impressions/analytics/{item_id}')
+async def item_impressions_analytics(item_id: str):
+    search_page_impressions = ""
+    recs_page_impressions = ""
+    category_page_impressions = ""
+    total_impressions = ""
+    resp = await es.search(  
+        index='item-viewstream',
+        body={
+            "_source": False,
+            "aggs": {
+                "AllPages": {
+                "filter": {
+                    "bool": {
+                    "must": [
+                        {
+                            "match": {
+                                "itemId": item_id
+                            }
+                        }
+                    ]
+                    }
+                }
+                },
+                "RecommendationsPage": {
+                "filter": {
+                    "bool": {
+                    "must": [
+                        {
+                            "match": {
+                                "itemId": item_id
+                            }
+                        },
+                        {
+                            "match": {
+                                "type.keyword": "Recommendations"
+                            }
+                        }
+                    ]
+                    }
+                }
+                },
+                "SearchPage": {
+                "filter": {
+                    "bool": {
+                    "must": [
+                        {
+                            "match": {
+                                "itemId": item_id
+                            }
+                        },
+                        {
+                            "match": {
+                                "type.keyword": "Search"
+                            }
+                        }
+                    ]
+                    }
+                }
+                },
+                "CategoryPage": {
+                "filter": {
+                    "bool": {
+                    "must": [
+                        {
+                            "match": {
+                                "itemId": item_id
+                            }
+                        },
+                        {
+                            "match": {
+                                "type.keyword": "CategoryViewAll"
+                            }
+                        }
+                    ]
+                    }
+                }
+                },
+                "ProfilePage": {
+                "filter": {
+                    "bool": {
+                    "must": [
+                        {
+                            "match": {
+                                "itemId": item_id
+                            }
+                        },
+                        {
+                            "match": {
+                                "type.keyword": "MerchantProfileItems"
+                            }
+                        }
+                    ]
+                    }
+                }
+                }
+            }
+            }
+    )
+    aggs = resp["aggregations"]
+    search_page_impressions = aggs["SearchPage"]["doc_count"]
+    recs_page_impressions = aggs["RecommendationsPage"]["doc_count"]
+    category_page_impressions = aggs["CategoryPage"]["doc_count"]
+    profile_page_impressions = aggs["ProfilePage"]["doc_count"]
+    total_impressions = aggs["AllPages"]["doc_count"]
+    return {
+        "searchImpressions": search_page_impressions,
+        "recommendationsImpressions": recs_page_impressions,
+        "categoryImpressions": category_page_impressions,
+        "totalImpressions": total_impressions,
+        "profilePageImpressions": profile_page_impressions
+    }
+
+@app.get('item/clicks/analytics/{item_id}')
+async def item_clicks_analytics(item_id: str):
+    search_page_clicks = ""
+    recs_page_clicks = ""
+    category_page_clicks = ""
+    total_clicks = ""
+    profile_clicks = ""
+    resp = await es.search(  
+        index='clickstream',
+        body={
+            "_source": False,
+            "aggs": {
+                "AllPages": {
+                "filter": {
+                    "bool": {
+                    "must": [
+                        {
+                            "match": {
+                                "itemId": item_id
+                            }
+                        }
+                    ]
+                    }
+                }
+                },
+                "RecommendationsPage": {
+                "filter": {
+                    "bool": {
+                    "must": [
+                        {
+                            "match": {
+                                "itemId": item_id
+                            }
+                        },
+                        {
+                            "match": {
+                                "type.keyword": "RecommendationsPageClick"
+                            }
+                        }
+                    ]
+                    }
+                }
+                },
+                "SearchPage": {
+                "filter": {
+                    "bool": {
+                    "must": [
+                        {
+                            "match": {
+                                "itemId": item_id
+                            }
+                        },
+                        {
+                            "match": {
+                                "type.keyword": "SearchPageItemClick"
+                            }
+                        }
+                    ]
+                    }
+                }
+                },
+                "CategoryPage": {
+                "filter": {
+                    "bool": {
+                    "must": [
+                        {
+                            "match": {
+                                "itemId": item_id
+                            }
+                        },
+                        {
+                            "match": {
+                                "type.keyword": "CategoryItemClick"
+                            }
+                        }
+                    ]
+                    }
+                }
+                },
+                "ProfilePage": {
+                "filter": {
+                    "bool": {
+                    "must": [
+                        {
+                            "match": {
+                                "itemId": item_id
+                            }
+                        },
+                        {
+                            "match": {
+                                "type.keyword": "ProfileItemClick"
+                            }
+                        }
+                    ]
+                    }
+                }
+                }
+            }
+            }
+    )
+    aggs = resp["aggregations"]
+    search_page_clicks = aggs["SearchPage"]["doc_count"]
+    recs_page_clicks = aggs["RecommendationsPage"]["doc_count"]
+    category_page_clicks = aggs["CategoryPage"]["doc_count"]
+    total_clicks = aggs["AllPages"]["doc_count"]
+    profile_clicks = aggs["ProfilePage"]["doc_count"]
+    return {
+        "searchClicks": search_page_clicks,
+        "recommendationsClicks": recs_page_clicks,
+        "categoryClicks": category_page_clicks,
+        "totalClicks": total_clicks,
+        "profileClicks": profile_clicks,
     }
 
 @app.get('/clicks/analytics/{merchant_id}')
