@@ -497,7 +497,7 @@ async def merchant_impressions_analytics(merchant_id: str):
         "profilePageImpressions": profile_page_impresssions
     }
 
-@app.get('item/impressions/analytics/{item_id}')
+@app.get('/item/impressions/analytics/{item_id}')
 async def item_impressions_analytics(item_id: str):
     search_page_impressions = ""
     recs_page_impressions = ""
@@ -610,7 +610,7 @@ async def item_impressions_analytics(item_id: str):
         "profilePageImpressions": profile_page_impressions
     }
 
-@app.get('item/clicks/analytics/{item_id}')
+@app.get('/item/clicks/analytics/{item_id}')
 async def item_clicks_analytics(item_id: str):
     search_page_clicks = ""
     recs_page_clicks = ""
