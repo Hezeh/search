@@ -1,4 +1,5 @@
 import os
+from aiohttp.helpers import BasicAuth
 
 from fastapi import FastAPI, Header, Request, Response, status
 from elasticsearch import AsyncElasticsearch
@@ -8,6 +9,10 @@ from pydantic import BaseModel
 import json
 import base64
 import uuid
+import aiohttp
+# import googleapiclient
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
 
 app = FastAPI()
 es = AsyncElasticsearch()
@@ -837,6 +842,37 @@ async def merchant_clicks_analytics(merchant_id: str):
         "totalClicks": total_clicks,
         "profileClicks": profile_clicks,
     }
+
+class PurchaseModel(BaseModel):
+    packageName: Optional[str]
+    token: Optional[str]
+    subscriptionId: Optional[str]
+
+@app.post('/purchases/subscriptions')
+async def verify_purchase(purchase: PurchaseModel):
+    credentials = service_account.Credentials.from_service_account_file("./service_account.json")
+    scoped_credentials = credentials.with_scopes(
+    ['https://www.googleapis.com/auth/androidpublisher'])
+    service = build("androidpublisher", "v3", credentials=scoped_credentials)
+    #Use the token your API got from the app to verify the purchase
+    result = service.purchases().subscriptions().get(packageName=purchase.packageName, subscriptionId=purchase.subscriptionId, token=purchase.token).execute()
+    # key = 'AIzaSyDx3sQEe0FwOcrUxthdrYeTO-CuZfa1nrc'
+    # google_url = f'https://androidpublisher.googleapis.com/androidpublisher/v3/applications/{purchase.packageName}/purchases/subscriptions/{purchase.subscriptionId}/tokens/{purchase.token}?key={key}'
+    # async with aiohttp.ClientSession() as session:
+    #     async with session.get(google_url, headers={
+    #         'Authorization': 'Bearer 207309330467-jcfa7l875gfh46s0thqo5atpkagartoi.apps.googleusercontent.com',
+    #         'Accept': 'application/json'
+    #     }) as response:
+
+    #         print("Status:", response.status)
+    #         print("Content-type:", response.headers['content-type'])
+
+    #         resp_json = await response.json()
+    #         print(resp_json)
+    print(result)
+    return {}
+    
+
 
 @app.on_event("shutdown")
 async def app_shutdown():
