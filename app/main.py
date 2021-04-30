@@ -855,7 +855,7 @@ async def verify_purchase(purchase: PurchaseModel):
     # credentials = service_account.Credentials.from_service_account_file("./service_account.json")
     # scoped_credentials = credentials.with_scopes(
     # ['https://www.googleapis.com/auth/androidpublisher'])
-    credentials, project = google.auth.default(scopes=['https://www.googleapis.com/auth/androidpublisher'])
+    credentials, project = google.auth.default(scopes=['https://www.googleapis.com/auth/cloud-platform'])
     service = build("androidpublisher", "v3", credentials=credentials)
     # credentials = ServiceAccountCredentials.from_json_keyfile_name(
     #   'service-account-abcdef123456.json',
