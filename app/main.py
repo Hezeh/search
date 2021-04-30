@@ -13,6 +13,8 @@ import aiohttp
 # import googleapiclient
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
+import httplib2
+import google
 
 app = FastAPI()
 es = AsyncElasticsearch()
@@ -850,10 +852,21 @@ class PurchaseModel(BaseModel):
 
 @app.post('/purchases/subscriptions')
 async def verify_purchase(purchase: PurchaseModel):
-    credentials = service_account.Credentials.from_service_account_file("./service_account.json")
-    scoped_credentials = credentials.with_scopes(
-    ['https://www.googleapis.com/auth/androidpublisher'])
-    service = build("androidpublisher", "v3", credentials=scoped_credentials)
+    # credentials = service_account.Credentials.from_service_account_file("./service_account.json")
+    # scoped_credentials = credentials.with_scopes(
+    # ['https://www.googleapis.com/auth/androidpublisher'])
+    credentials, project = google.auth.default()
+    service = build("androidpublisher", "v3", credentials=credentials)
+    # credentials = ServiceAccountCredentials.from_json_keyfile_name(
+    #   'service-account-abcdef123456.json',
+    # scopes='https://www.googleapis.com/auth/tasks')
+
+    # # Create an httplib2.Http object to handle our HTTP requests and authorize
+    # # it with the Credentials.
+    # http = httplib2.Http()
+    # http = credentials.authorize(http)
+
+    # service = build("tasks", "v1", http=http)
     #Use the token your API got from the app to verify the purchase
     result = service.purchases().subscriptions().get(packageName=purchase.packageName, subscriptionId=purchase.subscriptionId, token=purchase.token).execute()
     # key = 'AIzaSyDx3sQEe0FwOcrUxthdrYeTO-CuZfa1nrc'
