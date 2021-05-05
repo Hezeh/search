@@ -196,9 +196,39 @@ async def delete_document(request: Request):
     resp = await item_delete(id)
     return resp
 
+class PastSearch(BaseModel):
+    deviceId: Optional[str]
+    userId: Optional[str]
+    query: Optional[str]
+    lat: Optional[float]
+    lon: Optional[float]
+
+@app.post("/searches")
+async def past_searches(past_search: PastSearch, x_forwarded_for: Optional[str] = Header(None),):
+    id = uuid.uuid4()
+    body = {}
+    if past_search.deviceId != None:
+        body["deviceId"] = past_search.deviceId
+    if past_search.userId != None:
+        body["userId"] = past_search.userId
+    if past_search.query != None:
+        body["query"] = past_search.query
+    if past_search.lat != None and past_search.lon:
+        body["location"] = {
+            "lat": past_search.lat,
+            "lon": past_search.lon
+        }
+    body["ipAddress"] = x_forwarded_for
+    resp = await es.index(index="past-searches", id=id, body=body)
+    return resp
+
 
 @app.get("/recs")
 async def recs(lat: Optional[float] = None, lon: Optional[float] = None, x_forwarded_for: Optional[str] = Header(None),):
+    # Get the userId or deviceId
+    # Get browsing history
+    # Sort the items based on past
+    # clicked items
     latitude = lat
     longitude = lon
     recsId = uuid.uuid4() 
@@ -852,11 +882,11 @@ class PurchaseModel(BaseModel):
 
 @app.post('/purchases/subscriptions')
 async def verify_purchase(purchase: PurchaseModel):
-    # credentials = service_account.Credentials.from_service_account_file("./service_account.json")
-    # scoped_credentials = credentials.with_scopes(
-    # ['https://www.googleapis.com/auth/androidpublisher'])
-    credentials, project = google.auth.default(scopes=['https://www.googleapis.com/auth/cloud-platform'])
-    service = build("androidpublisher", "v3", credentials=credentials)
+    credentials = service_account.Credentials.from_service_account_file("service_account.json")
+    scoped_credentials = credentials.with_scopes(
+    ['https://www.googleapis.com/auth/androidpublisher'])
+    # credentials, project = google.auth.default(scopes=['https://www.googleapis.com/auth/androidpublisher'])
+    service = build("androidpublisher", "v3", credentials=scoped_credentials)
     # credentials = ServiceAccountCredentials.from_json_keyfile_name(
     #   'service-account-abcdef123456.json',
     # scopes='https://www.googleapis.com/auth/tasks')
@@ -868,7 +898,7 @@ async def verify_purchase(purchase: PurchaseModel):
 
     # service = build("tasks", "v1", http=http)
     #Use the token your API got from the app to verify the purchase
-    result = service.purchases().subscriptions().get(packageName=purchase.packageName, subscriptionId=purchase.subscriptionId, token=purchase.token).execute()
+    # result = service.purchases().subscriptions().get(packageName=purchase.packageName, subscriptionId=purchase.subscriptionId, token=purchase.token).execute()
     # key = 'AIzaSyDx3sQEe0FwOcrUxthdrYeTO-CuZfa1nrc'
     # google_url = f'https://androidpublisher.googleapis.com/androidpublisher/v3/applications/{purchase.packageName}/purchases/subscriptions/{purchase.subscriptionId}/tokens/{purchase.token}?key={key}'
     # async with aiohttp.ClientSession() as session:
@@ -882,7 +912,7 @@ async def verify_purchase(purchase: PurchaseModel):
 
     #         resp_json = await response.json()
     #         print(resp_json)
-    print(result)
+    # print(result)
     return {}
     
 
