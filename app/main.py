@@ -193,8 +193,12 @@ async def delete_document(request: Request):
     payload = base64.b64decode(pubsub_message["message"]["data"])
     json_payload = json.loads(payload)
     id = json_payload["itemId"]
-    resp = await item_delete(id)
-    return resp
+    exists = await es.exists(index="items", id=id)
+    if exists:
+        resp = await item_delete(id)
+        return resp
+    else:
+        return {}
 
 class PastSearch(BaseModel):
     deviceId: Optional[str]
