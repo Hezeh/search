@@ -207,6 +207,7 @@ class PastSearch(BaseModel):
     query: Optional[str]
     lat: Optional[float]
     lon: Optional[float]
+    timestamp: Optional[str]
 
 @app.post("/searches")
 async def past_searches(past_search: PastSearch, x_forwarded_for: Optional[str] = Header(None),):
@@ -218,6 +219,8 @@ async def past_searches(past_search: PastSearch, x_forwarded_for: Optional[str] 
         body["userId"] = past_search.userId
     if past_search.query != None:
         body["query"] = past_search.query
+    if past_search.timestamp != None:
+        body["timestamp"] = past_search.timestamp
     if past_search.lat != None and past_search.lon:
         body["location"] = {
             "lat": past_search.lat,
