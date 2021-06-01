@@ -245,9 +245,13 @@ async def recs(lat: Optional[float] = None, lon: Optional[float] = None, x_forwa
         r = requests.get(
             f"https://api.ipgeolocation.io/ipgeo?apiKey={key}&ip={x_forwarded_for}"
         )
-        ip_response = r.json()
-        latitude = ip_response["latitude"]
-        longitude = ip_response["longitude"]
+        if r.status_code == 200:
+            ip_response = r.json()
+            latitude = ip_response["latitude"]
+            longitude = ip_response["longitude"]
+        else:
+            latitude = 0
+            longitude = 0
     resp = await es.search(
         index="items",
         body={
