@@ -926,7 +926,44 @@ async def verify_purchase(purchase: PurchaseModel):
     #         print(resp_json)
     # print(result)
     return {}
-    
+
+class CustomerInfo(BaseModel):
+    email: Optional[str]
+    phonenumber: Optional[str]
+    name: Optional[str]
+
+class PaymentDetails(BaseModel):
+    payment_options: Optional[str]
+    amount: Optional[float]
+    customer_info: Optional[CustomerInfo]
+
+@app.post("/pay")
+async def custom_pay(details: PaymentDetails):
+    flutterwave_url = "https://api.flutterwave.com/v3/payments"
+    ref = uuid.uuid4()
+    headers = {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': "Bearer FLWSECK_TEST-a510cfa731a204a0c9094a4caaf9934c-X",
+    }
+    data = {
+      "tx_ref": f"beammart-{ref}",
+      "amount": details.amount,
+      "currency": "KES",
+      "redirect_url": "https://www.beammart.app/",
+      "payment_options": details.payment_options,
+      "customer": {
+        "email": details.customer_info.email,
+        "phonenumber": details.customer_info.phonenumber,
+        "name": details.customer_info.name,
+      },
+      "customizations": {
+        "title": "Beammart Corporation",
+        "description": "Purchase Tokens",
+        "logo": "https://assets.piedpiper.com/logo.png"
+      },
+    }
+    r = requests.post(flutterwave_url, data = data, headers=headers)
+    return r.json()
 
 
 @app.on_event("shutdown")
