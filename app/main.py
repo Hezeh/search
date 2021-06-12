@@ -942,7 +942,7 @@ async def custom_pay(details: PaymentDetails):
     flutterwave_url = "https://api.flutterwave.com/v3/payments"
     ref = uuid.uuid4()
     headers = {
-        'Content-Type': 'application/json; charset=UTF-8',
+        'Content-Type': 'application/json',
         'Authorization': "Bearer FLWSECK_TEST-a510cfa731a204a0c9094a4caaf9934c-X",
     }
     data = {
@@ -962,7 +962,9 @@ async def custom_pay(details: PaymentDetails):
         "logo": "https://assets.piedpiper.com/logo.png"
       },
     }
-    r = requests.post(flutterwave_url, data = data, headers=headers)
+    json_data = json.dumps(data)
+    r = requests.post(flutterwave_url, data = json_data, headers=headers)
+    print(r.status_code)
     return r.json()
 
 
