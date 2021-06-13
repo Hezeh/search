@@ -928,6 +928,7 @@ async def verify_purchase(purchase: PurchaseModel):
     return {}
 
 class CustomerInfo(BaseModel):
+    id: Optional[str]
     email: Optional[str]
     phonenumber: Optional[str]
     name: Optional[str]
@@ -952,6 +953,7 @@ async def custom_pay(details: PaymentDetails):
       "redirect_url": "https://www.beammart.app/",
       "payment_options": details.payment_options,
       "customer": {
+        "id": details.customer_info.id,
         "email": details.customer_info.email,
         "phonenumber": details.customer_info.phonenumber,
         "name": details.customer_info.name,
@@ -966,6 +968,50 @@ async def custom_pay(details: PaymentDetails):
     r = requests.post(flutterwave_url, data = json_data, headers=headers)
     print(r.status_code)
     return r.json()
+
+@app.post("/wave-webhook")
+async def main(request: Request):
+    envelope = await request.body()
+    data = json.loads(envelope.decode("utf-8"))
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': "Bearer FLWSECK_TEST-a510cfa731a204a0c9094a4caaf9934c-X",
+    }
+    if data is not None:
+        if data['event'] == "charge.completed":
+            event_data = data['data']
+            status = event_data['status']
+            if status == "successful":
+                payment_id = event_data['id']
+                # Verify transaction
+                r = requests.get(f'https://api.flutterwave.com/v3/transactions/{payment_id}/verify', headers=headers)
+                if r.status_code == 200:
+                    transaction_data = r.json()
+                    amount = transaction_data['amount']
+                    card_data = transaction_data['card']
+                    customer_data = transaction_data['customer']
+                    customer_email = customer_data['email']
+                    customer_id = customer_data['id']
+                    # Check the amount and db and update the db
+                    if amount == 200:
+                        # Add 200 tokens to db & send an email to customer
+                        print(amount)
+                    elif amount == 500:
+                        print(amount)
+                    elif amount == 1000:
+                        print(amount)
+                    elif amount == 2500:
+                        print(amount)
+                    elif amount == 5000:
+                        print(amount)
+                    elif amount == 10000:
+                        print(amount)
+                
+        return {}
+    else:
+        return {
+            "message": "An error occurred"
+        }
 
 
 @app.on_event("shutdown")
