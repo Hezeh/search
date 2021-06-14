@@ -963,7 +963,7 @@ async def custom_pay(details: PaymentDetails):
     ref = uuid.uuid4()
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': "Bearer FLWSECK_TEST-a510cfa731a204a0c9094a4caaf9934c-X",
+        'Authorization': "Bearer FLWSECK-dcbb904f831b7a376e244ba3ff4c599c-X",
     }
     data = {
       "tx_ref": f"beammart-{ref}",
@@ -1003,7 +1003,7 @@ async def main(request: Request):
     data = json.loads(envelope.decode("utf-8"))
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': "Bearer FLWSECK_TEST-a510cfa731a204a0c9094a4caaf9934c-X",
+        'Authorization': "Bearer FLWSECK-dcbb904f831b7a376e244ba3ff4c599c-X",
     }
     if data is not None:
         if data['event'] == "charge.completed":
