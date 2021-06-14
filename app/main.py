@@ -19,13 +19,16 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
 
-project_id = 'beammart'
+# Use a service account
+cred = credentials.Certificate('/home/hezekiah/firestore-beammart.json')
+firebase_admin.initialize_app(cred)
 
+# project_id = 'beammart'
 # Use the application default credentials
-cred = credentials.ApplicationDefault()
-firebase_admin.initialize_app(cred, {
-  'projectId': project_id,
-})
+# cred = credentials.ApplicationDefault()
+# firebase_admin.initialize_app(cred, {
+#   'projectId': project_id,
+# })
 
 
 db = firestore.client()
