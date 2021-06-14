@@ -943,15 +943,15 @@ async def verify_purchase(purchase: PurchaseModel):
     return {}
 
 class CustomerInfo(BaseModel):
-    id: Optional[str]
-    email: Optional[str]
-    phonenumber: Optional[str]
-    name: Optional[str]
+    id: Optional[str] = None
+    email: Optional[str] = None
+    phonenumber: Optional[str] = None
+    name: Optional[str] = None
 
 class PaymentDetails(BaseModel):
-    payment_options: Optional[str]
-    amount: Optional[float]
-    customer_info: Optional[CustomerInfo]
+    payment_options: Optional[str] = None
+    amount: Optional[float] = None
+    customer_info: Optional[CustomerInfo] = None
 
 @app.post("/pay")
 async def custom_pay(details: PaymentDetails):
