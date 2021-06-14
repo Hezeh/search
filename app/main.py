@@ -953,7 +953,6 @@ async def custom_pay(details: PaymentDetails):
       "redirect_url": "https://www.beammart.app/",
       "payment_options": details.payment_options,
       "customer": {
-        "id": details.customer_info.id,
         "email": details.customer_info.email,
         "phonenumber": details.customer_info.phonenumber,
         "name": details.customer_info.name,
@@ -963,6 +962,9 @@ async def custom_pay(details: PaymentDetails):
         "description": "Purchase Tokens",
         "logo": "https://assets.piedpiper.com/logo.png"
       },
+      "meta": {
+          "customer_id" : details.customer_info.id
+      }
     }
     json_data = json.dumps(data)
     r = requests.post(flutterwave_url, data = json_data, headers=headers)
