@@ -994,7 +994,7 @@ async def custom_pay(details: PaymentDetails):
 def update_profile_in_transaction(transaction, profile_ref, amount):
     snapshot = profile_ref.get(transaction=transaction)
     transaction.update(profile_ref, {
-        u'tokens': snapshot.get(u'tokens') + amount
+        u'tokensBalance': snapshot.get(u'tokensBalance') + amount
     })
 
 @app.post("/wave-webhook")
