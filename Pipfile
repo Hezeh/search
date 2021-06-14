@@ -15,6 +15,7 @@ requests = "*"
 gunicorn = "*"
 geojson = "*"
 google-api-python-client = "*"
+firebase-admin = "*"
 
 [requires]
 python_version = "3.8"

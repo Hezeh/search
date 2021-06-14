@@ -15,6 +15,21 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 import httplib2
 import google
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import firestore
+
+project_id = 'beammart'
+
+# Use the application default credentials
+cred = credentials.ApplicationDefault()
+firebase_admin.initialize_app(cred, {
+  'projectId': project_id,
+})
+
+
+db = firestore.client()
+transaction = db.transaction()
 
 app = FastAPI()
 es = AsyncElasticsearch()
@@ -971,6 +986,13 @@ async def custom_pay(details: PaymentDetails):
     print(r.status_code)
     return r.json()
 
+@firestore.transactional
+def update_profile_in_transaction(transaction, profile_ref, amount):
+    snapshot = profile_ref.get(transaction=transaction)
+    transaction.update(profile_ref, {
+        u'tokens': snapshot.get(u'tokens') + amount
+    })
+
 @app.post("/wave-webhook")
 async def main(request: Request):
     envelope = await request.body()
@@ -990,24 +1012,32 @@ async def main(request: Request):
                 if r.status_code == 200:
                     transaction_data = r.json()
                     amount = transaction_data['amount']
-                    card_data = transaction_data['card']
                     customer_data = transaction_data['customer']
+                    meta = transaction_data['meta']
                     customer_email = customer_data['email']
-                    customer_id = customer_data['id']
-                    # Check the amount and db and update the db
-                    if amount == 200:
-                        # Add 200 tokens to db & send an email to customer
-                        print(amount)
-                    elif amount == 500:
-                        print(amount)
-                    elif amount == 1000:
-                        print(amount)
-                    elif amount == 2500:
-                        print(amount)
-                    elif amount == 5000:
-                        print(amount)
-                    elif amount == 10000:
-                        print(amount)
+                    customer_id = meta['customer_id']
+                    if customer_id != None:
+                        doc_ref = db.collection(u'profile').document(f'{customer_id}')
+                        doc = doc_ref.get()
+                        if doc.exists:
+                            print(f'Document data: {doc.to_dict()}')
+                            # Check the amount and update the db
+                            if amount == 200:
+                                # Add 200 tokens to db & send an email to customer
+                                update_profile_in_transaction(transaction, doc_ref, 200)
+                            elif amount == 500:
+                                update_profile_in_transaction(transaction, doc_ref, 500)
+                            elif amount == 1000:
+                                update_profile_in_transaction(transaction, doc_ref, 1000)
+                            elif amount == 2500:
+                                update_profile_in_transaction(transaction, doc_ref, 2500)
+                            elif amount == 5000:
+                                update_profile_in_transaction(transaction, doc_ref, 5000)
+                            elif amount == 10000:
+                                update_profile_in_transaction(transaction, doc_ref, 10000)
+                        else:
+                            print(u'No such document!')
+                        
                 
         return {}
     else:
