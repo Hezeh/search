@@ -1025,7 +1025,6 @@ async def main(request: Request):
                         doc_ref = db.collection(u'profile').document(f'{customer_id}')
                         doc = doc_ref.get()
                         if doc.exists:
-                            print(f'Document data: {doc.to_dict()}')
                             # Check the amount and update the db
                             if amount == 200:
                                 # Add 200 tokens to db & send an email to customer
