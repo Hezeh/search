@@ -955,6 +955,7 @@ class PaymentDetails(BaseModel):
 
 @app.post("/pay")
 async def custom_pay(details: PaymentDetails):
+    print(details)
     flutterwave_url = "https://api.flutterwave.com/v3/payments"
     ref = uuid.uuid4()
     headers = {
@@ -978,7 +979,7 @@ async def custom_pay(details: PaymentDetails):
         "logo": "https://assets.piedpiper.com/logo.png"
       },
       "meta": {
-          "customer_id" : details.customer_info.id
+        "customer_id" : details.customer_info.id
       }
     }
     json_data = json.dumps(data)
@@ -1010,8 +1011,9 @@ async def main(request: Request):
                 # Verify transaction
                 r = requests.get(f'https://api.flutterwave.com/v3/transactions/{payment_id}/verify', headers=headers)
                 if r.status_code == 200:
-                    transaction_data = r.json()
-                    amount = transaction_data['amount']
+                    json_response = r.json()
+                    transaction_data = json_response["data"]
+                    amount = transaction_data["amount"]
                     customer_data = transaction_data['customer']
                     meta = transaction_data['meta']
                     customer_email = customer_data['email']
