@@ -196,8 +196,13 @@ async def update_index(request: Request):
     latitude = json_payload["location"]["_latitude"]
     longitude = json_payload["location"]["_longitude"]
     json_payload["location"] = {"lat": latitude, "lon": longitude}
-    resp = await item_update(id, json_payload)
-    return resp
+    exists = await es.exists(index="items", id=id)
+    if exists:
+        resp = await item_update(id, json_payload)
+        return resp
+    else:
+        resp = await item_index(id, json_payload)
+        return resp
 
 async def item_delete(id):
     # TODO: If doc exists then delete else just return
