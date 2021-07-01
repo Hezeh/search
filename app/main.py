@@ -49,8 +49,8 @@ async def ping():
 @app.get("/search")
 async def search_detail(
     q: str,
-    lat: Optional[float],
-    lon: Optional[float],
+    lat: Optional[float] = None,
+    lon: Optional[float] = None,
     user_agent: Optional[str] = Header(None),
     x_forwarded_for: Optional[str] = Header(None),
 ):
