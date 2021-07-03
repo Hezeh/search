@@ -8,6 +8,8 @@ router = APIRouter()
 @router.post('/clickstream', status_code=200, tags=["clickstream"])
 async def serp_clickstream(request: Request, response: Response):
     envelope = await request.body()
+    lat = None
+    lon = None
     if not envelope:
         msg = "no Pub/Sub message received"
         response.status_code = status.HTTP_400_BAD_REQUEST

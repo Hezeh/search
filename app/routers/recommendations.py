@@ -121,52 +121,54 @@ async def test_recs(lat: Optional[float] = None, lon: Optional[float] = None, x_
     resp = await es.search(
         index="items",
         body={
-            "function_score": {
-            "score_mode": "sum",
-            "functions": [
-                {
-                    "weight": 1.2,
-                    "filter": {
-                        "bool": {
-                        "should": [
-                            {
-                            "term": {
-                                "inStock": True
+            "query": {
+                "function_score": {
+                "score_mode": "sum",
+                "functions": [
+                    {
+                        "weight": 1.2,
+                        "filter": {
+                            "bool": {
+                            "should": [
+                                {
+                                "term": {
+                                    "inStock": True
+                                }
+                                }
+                            ]
                             }
+                        }
+                    },
+                    {
+                        "weight": 2.1,
+                        "gauss": {
+                            "location": {
+                                "origin": {
+                                    "lat": 0.5,
+                                    "lon": 5
+                                },
+                                "offset": "0km",
+                                "scale": "4km"
                             }
-                        ]
                         }
                     }
+                ]
                 },
-                {
-                    "weight": 2.1,
-                    "gauss": {
-                        "location": {
-                            "origin": {
-                                "lat": 0.5,
+                "sort": [
+                    {
+                        "_geo_distance": {
+                            "location": {
+                                "lat": 0.6,
                                 "lon": 5
                             },
-                            "offset": "0km",
-                            "scale": "4km"
+                            "order": "asc",
+                            "unit": "km",
+                            "ignore_unmapped": True
                         }
                     }
-                }
-            ]
-            },
-            "sort": [
-                {
-                    "_geo_distance": {
-                        "location": {
-                            "lat": 0.6,
-                            "lon": 5
-                        },
-                        "order": "asc",
-                        "unit": "km",
-                        "ignore_unmapped": True
-                    }
-                }
-            ]
-        },
+                ]
+            }
+        }
     )
     docs = resp["hits"]["hits"]
     recs_list = []
