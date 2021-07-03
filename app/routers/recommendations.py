@@ -205,9 +205,7 @@ async def test_recs(lat: Optional[float] = None, lon: Optional[float] = None, x_
                     recs.append(doc["_source"])
         recs_list.append(
             {
-                "category": f"{category}"
-            },
-            {
+                "category": f"{category}",
                 "items": recs
             }
         )
