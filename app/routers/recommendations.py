@@ -119,6 +119,7 @@ async def recs(lat: Optional[float] = None, lon: Optional[float] = None, x_forwa
             latitude = 0
             longitude = 0
     resp = await es.search(
+        size=50,
         index="items",
         body={
             "track_scores": True,
