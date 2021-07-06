@@ -9,8 +9,8 @@ router = APIRouter()
 @router.get("/search", tags=["search"])
 async def search_detail(
     q: str,
-    lat: float,
-    lon: float,
+    lat: Optional[float] = None,
+    lon: Optional[float] = None,
     user_agent: Optional[str] = Header(None),
     x_forwarded_for: Optional[str] = Header(None),
 ):
