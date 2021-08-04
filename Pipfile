@@ -16,6 +16,7 @@ gunicorn = "*"
 geojson = "*"
 google-api-python-client = "*"
 firebase-admin = "*"
+africastalking = "*"
 
 [requires]
 python_version = "3.8"
