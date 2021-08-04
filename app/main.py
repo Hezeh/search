@@ -1,9 +1,6 @@
 from fastapi import FastAPI
 from elasticsearch import AsyncElasticsearch
 
-import firebase_admin
-from firebase_admin import credentials
-from firebase_admin import firestore
 from routers import search
 from routers import recommendations
 from routers import indexing
@@ -20,6 +17,7 @@ from routers import merchant
 from routers import play_purchases
 from routers import item_viewstream
 from routers import sendy
+from routers import at_merchant_message
 
 
 app = FastAPI()
@@ -41,6 +39,7 @@ app.include_router(merchant.router)
 app.include_router(play_purchases.router)
 app.include_router(item_viewstream.router)
 app.include_router(sendy.router)
+app.include_router(at_merchant_message.router)
 
 
 @app.get("/")
