@@ -280,7 +280,7 @@ async def recs(lat: Optional[float] = None, lon: Optional[float] = None, x_forwa
     if len(docs) != 0:
         for doc in docs:
             # Extract the category of the document
-            doc_category = doc["_source"]["businessServiceCategory"]
+            doc_category = doc["_source"]["serviceBusinessCategory"]
             if (doc_category not in categories):
                 # Add the category to the categories list
                 categories.append(doc_category)
@@ -288,7 +288,7 @@ async def recs(lat: Optional[float] = None, lon: Optional[float] = None, x_forwa
         recs = []
         if len(docs) != 0:
             for doc in docs:
-                doc_category = doc["_source"]["businessServiceCategory"]
+                doc_category = doc["_source"]["serviceBusinessCategory"]
                 if doc_category == category:
                     recs.append(doc["_source"])
         recs_list.append(
