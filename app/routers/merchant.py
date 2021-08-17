@@ -8,6 +8,7 @@ async def merchant_items(merchant_id: str):
     parsed_results = []
     resp = await es.search(  
         index='items',
+        size=250,
         body={
             "query": {
                 "match": {
