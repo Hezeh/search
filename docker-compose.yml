@@ -18,6 +18,7 @@ services:
     environment:
       - xpack.security.enabled=false
       - "discovery.type=single-node"
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
     ulimits:
       memlock:
         soft: -1
