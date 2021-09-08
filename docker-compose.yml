@@ -9,9 +9,11 @@ services:
       - 80
     depends_on:
       - elasticsearch
-    labels: # new
+    labels:  # new
       - "traefik.enable=true"
-      - "traefik.http.routers.fastapi.rule=Host(`128.199.233.243`)"
+      - "traefik.http.routers.fastapi.rule=Host(`fastapi-traefik.beammart.app`)"
+      - "traefik.http.routers.fastapi.tls=true"
+      - "traefik.http.routers.fastapi.tls.certresolver=letsencrypt"
   elasticsearch:
     container_name: es-container
     image: docker.elastic.co/elasticsearch/elasticsearch:7.14.1
@@ -45,9 +47,20 @@ services:
       - 8081:8080
       - 9201:9200
       - 5602:5601
+      - 443:443
     volumes:
-      - "./traefik.toml:/etc/traefik/traefik.toml"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./traefik-public-certificates:/certificates"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`dashboard-fastapi-traefik.beammart.app`) && (PathPrefix(`/`)"
+      - "traefik.http.routers.dashboard.tls=true"
+      - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.middlewares=auth"
+      - "traefik.http.middlewares.auth.basicauth.users=testuser:$$apr1$$jIKW.bdS$$eKXe4Lxjgy/rH65wP1iQe1"
 networks:
   es-net:
     driver: bridge
+volumes:
+  traefik-public-certificates:
