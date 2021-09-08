@@ -18,6 +18,10 @@ services:
     environment:
       - xpack.security.enabled=false
       - "discovery.type=single-node"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
     networks:
       - es-net
     ports:
